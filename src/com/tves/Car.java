@@ -2,23 +2,32 @@ package com.tves;
 
 public class Car implements ParkingAssistant{
 
+    /** Parking street on which the car is driving.*/
+    private ParkingStreet parkingStreet;
+
     /** Two ultrasound sensors in the car.*/
     private Sensor frontSensor, backSensor;
 
-    /** Car registers available parking places on the RHS (right hand side).*/
-    private boolean availableParkingPlace;
+    /**
+     * Car registers available parking places on the RHS (right hand side).
+     * parking space number ranges from 1 to 500
+     * */
+    private int registeredParkingPlace;
 
     /** the situation of the detected parking places up to now.*/
-    private boolean isRegisteredParkingPlaceVacant;
+    private boolean isRegisteredParkingPlaceEmpty;
 
     /** Indicates whether the car is currently parked.*/
     private boolean isParked;
 
-    /** Current position of the car in a 2D plane.*/
-    private int xPosition, yPosition;
+    /** Current position of the car horizontally.
+     * x ranges from 1 to 500 to show car's position on the street
+     * */
+    private int xPosition;
 
-    /** Constructor to initialize the Car with specific sensors.*/
-    public Car(Sensor sensor1, Sensor sensor2) {
+    /** Constructor to initialize the Car with a given parking street and two sensors.*/
+    public Car(ParkingStreet PS, Sensor sensor1, Sensor sensor2) {
+        this.parkingStreet = PS;
         this.frontSensor = sensor1;
         this.backSensor = sensor2;
     }
@@ -52,17 +61,44 @@ public class Car implements ParkingAssistant{
     }
 
     /**
-     * queries the two ultrasound sensors at least 5 times,
-     * filters the noise in their results,
+     * queries the two ultrasound sensors at least 5 times, filters the noise in their results,
      * If one sensor is detected to continuously return very noisy output, it should be completely disregarded.
      * You can use averaging or any other statistical method to filter the noise from the signals received from the ultrasound sensors.
      *
-     * @param
-     * @return the distance to the nearest object in the right hand side
-     * @throws IllegalArgumentException If what happens
+     * @return boolean value as true if there is a parking stretch of 5m is found
      */
     @Override
-    public void isEmpty() {
+    public boolean isEmpty() {
+        /** Pseudo code
+         * //The measurements from sensors are combined and filtered to reliably find a free parking stretch of 5 meters.
+         * int dataFromFS, dataFromBS;
+         * // at least five times ...
+         * for (int i = 0; i < 5; i++){
+         *      dataFromFS = this.frontSensor.getSensorData();
+         *      // i am assuming that noise in the sensor data is when the result is not an integer btw 0 to 200
+         *      if (this.frontSensor.isNoise(dataFromFS)){
+         *          //its a noise and should be discarded
+         *      }
+         *      dataFromBS = this.backSensor.getSensorData();
+         *      if (this.backSensor.isNoise(dataFromBS)){
+         *          //its a noise and should be discarded
+         *      }
+         * }
+         * // what if we still have noisy data
+         * while (this.frontSensor.isNoise(dataFromFS) || this.frontSensor.isNoise(dataFromFS) ){
+         * }
+
+         * //sensors return integer values from [0,200] depending upon detection of another object
+         * // we assume 1 means another object is at 1 meters distance to the sensor.
+         * // if dataFromFS == 0 -> there is no object detected by front sensor
+         * // To find a parking stretch of 5 meters, the front and back sensor values must span 5 meters
+         * int objectAtDistance = Math.abs(dataFromFS - dataFromBS);
+         * if (objectAtDistance >= 5){ //we have found a parking stretch of 5m
+         *      return true;
+         * }
+         * */
+
+        return true; // a temporary value
 
     }
 
@@ -73,7 +109,7 @@ public class Car implements ParkingAssistant{
      *
      * @param ?
      * @return ?
-     * @throws IllegalArgumentException If what happens
+     * @throws IllegalArgumentException ??
      */
     @Override
     public void Park() {
@@ -106,11 +142,24 @@ public class Car implements ParkingAssistant{
 
     public static void main(String[] args) {
      /**
-      * We assume that the car moving along a perfectly straight street which is 500 meters long and registers the available parking places on its right-hand side.
+      * We assume that the car moving along a perfectly straight street which is 500 meters long
+      * and registers the available parking places on its right-hand side.
       * To do this the car moves forward and uses two ultrasound sensors to check whether there is a free space on its right hand side.
       * The measurements are combined and filtered to reliably find a free parking stretch of 5 meters.
       * The car then moves to the end of the 5 meter stretch and runs a standard parallel reverse parking maneuver.
       */
+
+        /**
+         * The above translates to code that looks like follows
+         * while (this.xPosition < this.parkingStreet.getParkingStreetLength()){
+         *      MoveForward(); //Move forward 1m at a time
+         *      // ask sensors whether there is empty place on the RHS
+         *      if (isEmpty()){
+         *          Park();
+         *      }
+         * }
+         *
+         */
 
      /**
       *

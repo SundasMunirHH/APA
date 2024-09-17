@@ -7,4 +7,10 @@ public interface Sensor {
      */
     int getSensorData();
 
+    /**
+     * If the sensor inputs are not integers in the range of 0 to 200
+     * it indicates noise.
+     */
+    boolean isNoise(int value);
+
 }

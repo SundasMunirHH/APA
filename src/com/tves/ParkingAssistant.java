@@ -4,8 +4,6 @@ package com.tves;
  * An interface to the parking assistant in a car.
  */
 public interface ParkingAssistant {
-
-
     /**
      * @Description: moves the car 1 meter forward,
      * queries the two sensors through the isEmpty method
@@ -50,7 +48,7 @@ public interface ParkingAssistant {
      * @return the distance to the nearest object in the right hand side
      * @throws IllegalArgumentException If what happens
      */
-    public void isEmpty();
+    public boolean isEmpty();
 
     /**
      * @Description: moves the car to the beginning of the current 5 meter free stretch of parking place, if it is already detected or

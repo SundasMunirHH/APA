@@ -12,4 +12,10 @@ public class UltraSoundSensor implements Sensor{
         return 0; // Example value in meters
     }
 
+    @Override
+    public boolean isNoise(int value) {
+        // Does the value belong to noisy state
+        return value < 0 || value > 200 ? true : false;
+    }
+
 }

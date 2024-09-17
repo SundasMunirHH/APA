@@ -73,4 +73,13 @@ public class ParkingStreet {
         return parkingPlaces[pos];
     }
 
+    /**
+     * @Description:
+     *
+     * @return int as parking street length
+     */
+    public int getParkingStreetLength(){
+        return parkingStreetLength;
+    }
+
 }
