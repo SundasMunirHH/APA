@@ -40,54 +40,48 @@ public interface ParkingAssistant {
      * If one sensor is detected to continuously return very noisy output, it should be completely disregarded.
      * You can use averaging or any other statistical method to filter the noise from the signals received from the ultrasound sensors.
      *
-     * @Pre-condition:
-     * @Post-condition:
-     * @Test-cases:
+     * @Pre-condition
+     * @Post-condition
+     * @Test-cases
      *
-     * @param
      * @return the distance to the nearest object in the right hand side
-     * @throws IllegalArgumentException If what happens
+     * @throws IllegalArgumentException ???
      */
-    public boolean isEmpty();
+    public int isEmpty();
 
     /**
-     * @Description: moves the car to the beginning of the current 5 meter free stretch of parking place, if it is already detected or
+     * @Description moves the car to the beginning of the current 5 meter free stretch of parking place, if it is already detected or
      * moves the car forwards towards the end of the street until such a stretch is detected.
      * Then it performs a pre-programmed reverse parallel parking maneuver.
      *
-     * @Pre-condition:
-     * @Post-condition:
-     * @Test-cases:
+     * @Pre-condition
+     * @Post-condition
+     * @Test-cases
      *
-     * @param ?
-     * @return ?
-     * @throws IllegalArgumentException If what happens
+     * @throws IllegalArgumentException ???
      */
     public void Park();
 
     /**
-     * @Description: moves the car forward (and to left) to front of the parking place, if it is parked.
+     * @Description moves the car forward (and to left) to front of the parking place, if it is parked.
      *
-     * @Pre-condition:
-     * @Post-condition:
-     * @Test-cases:
+     * @Pre-condition
+     * @Post-condition
+     * @Test-cases
      *
-     * @param
-     * @return ?
      * @throws IllegalArgumentException If what happens
      */
     public void UnPark();
 
     /**
-     * @Description:
+     * @Description
      *
-     * @Pre-condition:
-     * @Post-condition:
-     * @Test-cases:
+     * @Pre-condition
+     * @Post-condition
+     * @Test-cases
      *
-     * @param
-     * @return current position of the car in the street and its situation (whether it is parked or not).
-     * @throws IllegalArgumentException If what happens
+     * @return current position of the car in the street and its situation (whether it is parked or not). [xPos, true/false]
+     * @throws?
      */
-    public void WhereIs();
+    public Object[] WhereIs();
 }

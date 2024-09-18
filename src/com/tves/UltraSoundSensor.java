@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class UltraSoundSensor implements Sensor{
 
-    /** Sice we can have a front and back sensor, we need a name to produce error reports. */
+    /** Since we can have a front and a back sensor, we need a name to produce error reports. */
     private String sensorName;
 
     public UltraSoundSensor(String name){
@@ -16,7 +16,7 @@ public class UltraSoundSensor implements Sensor{
     @Override
     public int getSensorData() {
         // Return data from the sensor
-        return 0; // Example value in meters
+        return 0; // Example value in meters, 0 means no object detected
     }
 
     @Override
