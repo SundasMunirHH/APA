@@ -17,7 +17,7 @@ public interface ParkingAssistant {
      * @return A data structure [the current car position, the situation of the detected parking places up to now.]
      * @throws ?IllegalArgumentException If what happens
      */
-    public void MoveForward();
+    public Object[] MoveForward();
 
     /**
      * @Description: moves the car 1 meter backwards,

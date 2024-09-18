@@ -10,7 +10,7 @@ public class ParkingStreet {
      * total 100 parking places
      */
 
-    /** All parking places from 1 to 100 with boolean value false showing vacant/empty position */
+    /** All parking places from 0 to 99 with boolean value false showing vacant/empty places. */
     private boolean[] parkingPlaces;
 
     /** A straight 500 meters long street */
@@ -50,27 +50,29 @@ public class ParkingStreet {
      * @Description: A car can register a particular parking place, depending on its current x position
      * For example, if xPos of the car is between [1, 5] meters on the street,
      * it can register 1st vacant parking space on the right
-     * xPos of the car is between [6, 10] -> register 2nd parking space as parkingPlaces[0] = true
-     * xPos of the car is between [496, 500] -> register last/100th parking space as parkingPlaces[499] = true
+     * xPos of the car is between [6 to 10] m -> register 2nd parking space as parkingPlaces[1] = true
+     * xPos of the car is between [496, 500] -> register last/100th parking space as parkingPlaces[99] = true
      *
      * @param xPos of the car
      */
-    public void registerParkingPlace(int xPos){
+    public int registerParkingPlace(int xPos){
         /**
          * Example Code
          * int place = (xPos - 1) / this.parkingPlaceLength;
-         * parkingPlaces[place] = true;
+         * this.parkingPlaces[place] = true;
+         * return place;
          */
+        return 0;
     }
 
     /**
-     * @Description: A car can register a particular parking place, depending on its current x position
+     * @Description: A parking place is either empty or not
      *
-     * @param pos of the parking place [1,100]
+     * @param pos of the parking place [0,99]
      * @return boolean as parkingPlaces[pos]
      */
     public boolean isEmptyParkingPlace(int pos){
-        return parkingPlaces[pos];
+        return this.parkingPlaces[pos];
     }
 
     /**
@@ -79,7 +81,7 @@ public class ParkingStreet {
      * @return int as parking street length
      */
     public int getParkingStreetLength(){
-        return parkingStreetLength;
+        return this.parkingStreetLength;
     }
 
 }
