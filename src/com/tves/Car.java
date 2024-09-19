@@ -20,10 +20,6 @@ public class Car implements ParkingAssistant{
      */
     private int xPosition;
 
-    /** Current position of the car Vertically (e.g., driveway is at y=0; parking place is at y=10).
-     * yPosition ranges from 0 to 10 to show car's position on the street
-     */
-    private int yPosition;
 
     /** Constructor to initialize the Car with a given parking street and two sensors.*/
     public Car(Sensor sensor1, Sensor sensor2) {
@@ -31,7 +27,7 @@ public class Car implements ParkingAssistant{
         this.backSensor = sensor2;
         this.registeredParkingPlaces = new ArrayList<Integer>(); //ranges between [0,99] parking places
         this.isParked = false; //By default a car is not parked
-        this.xPosition = this.yPosition = 0; //at the start of the street on the driveway
+        this.xPosition = 0; //at the start of the street on the driveway
     }
 
     /**
@@ -44,8 +40,12 @@ public class Car implements ParkingAssistant{
     @Override
     public Object[] MoveForward() {
         /** Pseudo code*/
+        if (this.isParked){
+            // do nothing if it is parked
+            return new Object[]{this.xPosition, this.registeredParkingPlaces};
+        }
         // moves the car 1 meter forward until end of the street
-        while (this.xPosition < Utilities.parkingStreetLength - 1) {
+        if(this.xPosition < Utilities.parkingStreetLength - 1) {
             //we cannot let xPosition be 500, then position at RHS will be 100
             this.xPosition += 1;
         }
@@ -57,7 +57,6 @@ public class Car implements ParkingAssistant{
             if (!this.registeredParkingPlaces.contains(parkingRHS)) {
                 this.registeredParkingPlaces.add(parkingRHS);
             }
-
         }else{
             //wherever the car is now (horizontally), there is not a free parking space next to it.
             //lets remove from registered parking places
@@ -81,7 +80,7 @@ public class Car implements ParkingAssistant{
     @Override
     public void MoveBackward() {
         /** Pseudo code*/
-        while (this.xPosition > 0) {
+        if (this.xPosition > 0) {
             this.xPosition -= 1;
         }
     }
@@ -110,7 +109,7 @@ public class Car implements ParkingAssistant{
           int aggrDataBS = this.backSensor.aggregatedValue(dataFromBS);
           // we assume:
           // aggrDataFS == 1 -> another object is detected at 1 meters distance to the sensor.
-          // aggrDataFS == 0 -> there is no object detected by front sensor
+          // aggrDataFS == 0 -> another object is colliding
           // aggrDataFS < 0 -> noisy front sensor
           if (aggrDataFS < 0 || aggrDataBS < 0){
               //we must disregard data from noisy sensor (but what do we assume when we disregard?)
@@ -125,7 +124,7 @@ public class Car implements ParkingAssistant{
     /** calls isEmpty method to get sensors data and estimate whether we have 5m long stretch avaialable */
     private boolean isAvailableParkingPlace(){
         int distanceToObjectRHS = isEmpty();
-        if (distanceToObjectRHS == 0 || distanceToObjectRHS >= 5){
+        if (distanceToObjectRHS >= 5){
             //we have a parking stretch of 5m, when either there are no objects detected or
             //objects are detected at least 5m far away
             return true;
@@ -159,11 +158,9 @@ public class Car implements ParkingAssistant{
              if (availablePP.contains(parkingRHS)) {
                  // we have a vacant registered parking place
                  this.isParked = true;
-                 this.reverseParallelParkingManeuver();
+                 //Here we will have reverse parking maneuver.
+                 //this.reverseParallelParkingManeuver();
                  break;
-             } else {
-                 //we need to find vacant registered place
-                 continue;
              }
          }
     }
@@ -173,15 +170,10 @@ public class Car implements ParkingAssistant{
      * Currently only sets y to 0 to get the car in the driving area
      *
      */
-    private void reverseParallelParkingManeuver(){
-        this.yPosition = 10; //lets assume the car moved to the right (on the parking area)
-    }
 
     /**
      * @Description: moves the car forward (and to left) to front of the parking place, if it is parked.
      *
-     * @param
-     * @return ?
      * @throws IllegalArgumentException If what happens
      */
     @Override
@@ -193,17 +185,16 @@ public class Car implements ParkingAssistant{
                if (driveUpto > Utilities.parkingStreetLength){
                    driveUpto = Utilities.parkingStreetLength;
                }
+               this.isParked = false;
                while (this.xPosition < driveUpto){
                    MoveForward(); //Move forward 1m at a time
                }
-               this.yPosition = 0; //lets assume the car moved to the left (on the drive area)
-               this.isParked = false;
+
             }
     }
 
     /**
      *
-     * @param
      * @return current position of the car in the street and its situation (whether it is parked or not).
      * @throws IllegalArgumentException If what happens
      */
@@ -222,7 +213,7 @@ public class Car implements ParkingAssistant{
      */
     private int getParkingPlaceRHS(){
         /** Pseudo Code */
-        int place = this.xPosition / Utilities.totalParkingPlaces;
+        int place = this.xPosition / Utilities.parkingPlaceLength;
         return place;
     }
 
