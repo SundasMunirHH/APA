@@ -16,13 +16,13 @@ public class UltraSoundSensor implements Sensor{
     @Override
     public int getSensorData() {
         // Return data from the sensor
-        return 0; // Example value in meters, 0 means no object detected
+        return -1; // Example value in meters, <0 is no detection, > 200 is Noise
     }
 
     @Override
     public boolean isNoise(int value) {
         // Does the value belong to noisy state
-        return value < 0 || value > 200 ? true : false;
+        return value > 200 ? true : false;
     }
 
     @Override

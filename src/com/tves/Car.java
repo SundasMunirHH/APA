@@ -20,7 +20,6 @@ public class Car implements ParkingAssistant{
      */
     private int xPosition;
 
-
     /** Constructor to initialize the Car with a given parking street and two sensors.*/
     public Car(Sensor sensor1, Sensor sensor2) {
         this.frontSensor = sensor1;
@@ -49,7 +48,19 @@ public class Car implements ParkingAssistant{
             //we cannot let xPosition be 500, then position at RHS will be 100
             this.xPosition += 1;
         }
-        // Parking place on RHS of current position
+        // Register parking place on RHS of current position
+        this.registerParkingPlace();
+
+        // Return a Pair/object with xPosition and situation of the detected available parking places such as [10,[0,1,3, ..., 86]]
+        return new Object[]{this.xPosition, this.registeredParkingPlaces};
+    }
+
+    /**
+     * Finds 5m long empty stretch by querying two sensors through the isEmpty method and
+     * registers parking place
+     */
+    private void registerParkingPlace(){
+        // Get parking place on RHS of current position
         int parkingRHS = this.getParkingPlaceRHS();
         // First detect empty place on RHS to register available parking places
         if (isAvailableParkingPlace()){
@@ -64,25 +75,29 @@ public class Car implements ParkingAssistant{
                 this.registeredParkingPlaces.remove(parkingRHS);
             }
         }
-
-        // Return a Pair/object with xPosition and situation of the detected available parking places such as [10,[0,1,3, ..., 86]]
-        return new Object[]{this.xPosition, this.registeredParkingPlaces};
     }
 
     /**
      * moves the car 1 meter backwards,
-     * queries the two sensors through the isEmpty method
      * The car cannot be moved behind if it is already at the beginning of the street.
      *
-     * @return A data structure [the current car position, the situation of the detected parking places up to now.]
      * @throws IllegalArgumentException If what happens
      */
     @Override
-    public void MoveBackward() {
+    public Object[] MoveBackward() {
         /** Pseudo code*/
+        if (this.isParked){
+            // do nothing if it is parked
+            return new Object[]{this.xPosition, this.registeredParkingPlaces};
+        }
         if (this.xPosition > 0) {
             this.xPosition -= 1;
         }
+
+        // Register parking place on RHS of current position
+        registerParkingPlace();
+
+        return new Object[]{this.xPosition, this.registeredParkingPlaces};
     }
 
     /**
@@ -110,21 +125,27 @@ public class Car implements ParkingAssistant{
           // we assume:
           // aggrDataFS == 1 -> another object is detected at 1 meters distance to the sensor.
           // aggrDataFS == 0 -> another object is colliding
-          // aggrDataFS < 0 -> noisy front sensor
-          if (aggrDataFS < 0 || aggrDataBS < 0){
+          // aggrDataFS > 0 -> noisy front sensor
+          if (aggrDataFS > 200 || aggrDataBS > 200){
               //we must disregard data from noisy sensor (but what do we assume when we disregard?)
               // for now, lets assume we do not go ahead with code when one sensor is noisy
               return -1;
           }
+        int distanceToObjectRHS;
+          if (aggrDataFS < 0 && aggrDataBS < 0){
+              //Nothing detected by both sensors
+              distanceToObjectRHS = -1;
+          }else{
+              distanceToObjectRHS = aggrDataFS - aggrDataBS; //Math.abs(aggrDataFS - aggrDataBS);
+          }
           // To find a parking stretch of 5 meters, the front and back sensor values must span 5 meters
-          int distanceToObjectRHS = Math.abs(aggrDataFS - aggrDataBS);
         return distanceToObjectRHS;
     }
 
-    /** calls isEmpty method to get sensors data and estimate whether we have 5m long stretch avaialable */
+    /** calls isEmpty method to get sensors data and estimate whether we have 5m long stretch available */
     private boolean isAvailableParkingPlace(){
         int distanceToObjectRHS = isEmpty();
-        if (distanceToObjectRHS >= 5){
+        if (distanceToObjectRHS < 0 || distanceToObjectRHS >= 5){
             //we have a parking stretch of 5m, when either there are no objects detected or
             //objects are detected at least 5m far away
             return true;
@@ -144,11 +165,11 @@ public class Car implements ParkingAssistant{
     @Override
     public void Park() {
         /** Pseudo code */
-         // If the car us already parked we do not need to do anything
+         // If the car is already parked we do not need to do anything
          if (this.isParked){
              return;
          }
-         while (!this.isParked || this.xPosition < Utilities.parkingStreetLength) {
+         while (!this.isParked && this.xPosition < Utilities.parkingStreetLength -1){
              Object[] status = MoveForward(); //Moves forward 1m, returns car's pos and situation of registered parking places
              //returned status is [10,[0,3,6, ..., 71]] //e.g., available parking places are 0,3,6, ..., 71
              ArrayList<Integer> availablePP = (ArrayList<Integer>) status[1];
@@ -163,6 +184,7 @@ public class Car implements ParkingAssistant{
                  break;
              }
          }
+         // what if we have still not parked??
     }
 
     /**
@@ -218,6 +240,16 @@ public class Car implements ParkingAssistant{
     }
 
     public static void main(String[] args) {
+      /*  Car[] mC = new Car[10];
+        for (int i=0;i<10;i++){
+            Sensor frontSensor = new UltraSoundSensor("frontSensor");
+            Sensor backSensor = new UltraSoundSensor("backSensor");
+            mC[i] = new Car(frontSensor, backSensor);
+            mC[i].Park();
+            Object[] where = mC[i].WhereIs();
+            System.out.println(i+1 +" car is parked at: " + where[0]);
+        }*/
+
      /**
       * We assume that the car is moving along a perfectly straight street which is 500 meters long
       * and registers the available parking places on its right-hand side.

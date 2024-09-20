@@ -32,7 +32,7 @@ public interface ParkingAssistant {
      * @return A data structure [the current car position, the situation of the detected parking places up to now.]
      * @throws IllegalArgumentException If what happens
      */
-    public void MoveBackward();
+    public Object[] MoveBackward();
 
     /**
      * @Description: queries the two ultrasound sensors at least 5 times,
