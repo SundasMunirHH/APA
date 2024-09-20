@@ -126,20 +126,34 @@ public class Car implements ParkingAssistant{
           // aggrDataFS == 1 -> another object is detected at 1 meters distance to the sensor.
           // aggrDataFS == 0 -> another object is colliding
           // aggrDataFS > 0 -> noisy front sensor
-          if (aggrDataFS > 200 || aggrDataBS > 200){
-              //we must disregard data from noisy sensor (but what do we assume when we disregard?)
-              // for now, lets assume we do not go ahead with code when one sensor is noisy
-              return -1;
-          }
-        int distanceToObjectRHS;
+        int aggrDataOneSensor;
+        if (aggrDataFS > 200 || aggrDataBS > 200){
+            //we disregard data from noisy sensor
+            // and assume the value of well-functioning sensor
+            if (aggrDataBS <= 200){
+                aggrDataOneSensor = aggrDataBS;
+            }
+            else if (aggrDataFS <= 200){
+                aggrDataOneSensor = aggrDataFS;
+            }else{
+                //Oops, both sensors are noisy
+                //lets assume there is no object detected
+                aggrDataOneSensor = -1;
+            }
+        }
+        else{
+            //both sensors are well-functioning, get average of both values.
+            aggrDataOneSensor = (aggrDataFS + aggrDataBS)/2;
+        }
+        /*int distanceToObjectRHS;
           if (aggrDataFS < 0 && aggrDataBS < 0){
               //Nothing detected by both sensors
               distanceToObjectRHS = -1;
           }else{
               distanceToObjectRHS = aggrDataFS - aggrDataBS; //Math.abs(aggrDataFS - aggrDataBS);
-          }
+          }*/
           // To find a parking stretch of 5 meters, the front and back sensor values must span 5 meters
-        return distanceToObjectRHS;
+        return aggrDataOneSensor;
     }
 
     /** calls isEmpty method to get sensors data and estimate whether we have 5m long stretch available */
@@ -235,7 +249,7 @@ public class Car implements ParkingAssistant{
      */
     private int getParkingPlaceRHS(){
         /** Pseudo Code */
-        int place = this.xPosition / Utilities.parkingPlaceLength;
+        int place = this.xPosition;// / Utilities.parkingPlaceLength;
         return place;
     }
 
