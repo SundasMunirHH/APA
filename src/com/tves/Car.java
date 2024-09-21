@@ -10,7 +10,7 @@ public class Car implements ParkingAssistant{
      * Car registers available parking places on the RHS (right hand side).
      * parking places numbers range from 0 to 99
      * */
-    private ArrayList<Integer> registeredParkingPlaces;
+    private ArrayList<Boolean> registeredParkingPlaces;
 
     /** Indicates whether the car is currently parked.*/
     private boolean isParked;
@@ -20,13 +20,27 @@ public class Car implements ParkingAssistant{
      */
     private int xPosition;
 
+    private boolean[] parking;
+
     /** Constructor to initialize the Car with a given parking street and two sensors.*/
     public Car(Sensor sensor1, Sensor sensor2) {
         this.frontSensor1 = sensor1;
         this.frontSensor2 = sensor2;
-        this.registeredParkingPlaces = new ArrayList<Integer>(); //ranges between [0,99] parking places
+        this.registeredParkingPlaces = new ArrayList<Boolean>(); //ranges between [0,99] parking places
+        for(int i = 0; i < 500; i++){
+            registeredParkingPlaces.add(false);
+        }
         this.isParked = false; //By default a car is not parked
         this.xPosition = 0; //at the start of the street on the driveway
+        this.parking = new boolean[500];
+        for(int i = 0; i<this.parking.length;i++){
+            if(i%10 == 7 || i%10 == 8 || i%10 == 9){
+                this.parking[i] = false;
+            }
+            else{
+                this.parking[i] = true;
+            }
+        }
     }
 
     /**
@@ -44,12 +58,12 @@ public class Car implements ParkingAssistant{
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
         // moves the car 100 centimeter forward until end of the street
-        if(this.xPosition < Utilities.parkingStreetLength - 100) {
+        if(this.xPosition < Utilities.parkingStreetLength - 1) {
             //we cannot let xPosition be 500, then position at RHS will be 100
-            this.xPosition += 100;
+            this.xPosition += 1;
         }
         // Register parking place on RHS of current position
-        this.registerParkingPlace();
+        this.registeredParkingPlaces.set(this.xPosition, isAvailableParkingPlace());
 
         // Return a Pair/object with xPosition and situation of the detected available parking places such as [1000,[0,1,3, ..., 86]]
         return new Object[]{this.xPosition, this.registeredParkingPlaces};
@@ -59,6 +73,7 @@ public class Car implements ParkingAssistant{
      * Finds 500 cm long empty stretch by querying two sensors through the isEmpty method and
      * registers parking place
      */
+    /*
     private void registerParkingPlace(){
         // Get parking place on RHS of current position
         int parkingRHS = this.getParkingPlaceRHS();
@@ -76,7 +91,7 @@ public class Car implements ParkingAssistant{
             }
         }
     }
-
+    */
     /**
      * moves the car 1 meter backwards,
      * The car cannot be moved behind if it is already at the beginning of the street.
@@ -91,11 +106,11 @@ public class Car implements ParkingAssistant{
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
         if (this.xPosition > 0) {
-            this.xPosition -= 100;
+            this.xPosition -= 1;
         }
 
         // Register parking place on RHS of current position
-        registerParkingPlace();
+        this.registeredParkingPlaces.set(this.xPosition, isAvailableParkingPlace());
 
         return new Object[]{this.xPosition, this.registeredParkingPlaces};
     }
@@ -116,8 +131,8 @@ public class Car implements ParkingAssistant{
           int[] dataFromFS2 = new int[5];  // Array for back sensor data, at least five entries
           // query the sensors at least five times ...
           for (int i = 0; i < 5; i++){
-               dataFromFS1[i] = this.frontSensor1.getSensorData();
-               dataFromFS2[i] = this.frontSensor2.getSensorData();
+               dataFromFS1[i] = this.frontSensor1.getSensorData(this.parking,this.xPosition);
+               dataFromFS2[i] = this.frontSensor2.getSensorData(this.parking,this.xPosition);
           }
           // get aggregated data
           int aggrDataFS1 = this.frontSensor1.aggregatedValue(dataFromFS1);
@@ -129,7 +144,7 @@ public class Car implements ParkingAssistant{
         // Evaluating noisy data
         boolean FS1, FS2 = true;
         // decide on a threshold for the data to be considered noisy
-        int maxIndexFS1 = 0, maxIndexFS2 = 0, minIndexFS1 = 0, minIndexFS2 = 0, threshold = 0;
+        int maxIndexFS1 = 0, maxIndexFS2 = 0, minIndexFS1 = 0, minIndexFS2 = 0, threshold = 10;
         // finding max and min value to compare them and find if they are significant
         for(int i = 0; i < dataFromFS1.length; i++){
             // going through data set to search for the max and min value
@@ -186,12 +201,12 @@ public class Car implements ParkingAssistant{
     /** calls isEmpty method to get sensors data and estimate whether we have 5m long stretch available */
     private boolean isAvailableParkingPlace(){
         int distanceToObjectRHS = isEmpty();
-        if (distanceToObjectRHS < 0 || distanceToObjectRHS >= 500){
-            //we have a parking stretch of 500cm, when either there are no objects detected or
-            //objects are detected at least 500cm far away
-            return true;
-        }else{
+        if (distanceToObjectRHS <= 60 ){
+            //If the sensors gives a distance of 60 cm or less then the specific meter of space is occupied
+            //otherwise the spot is  considered empty
             return false;
+        }else{
+            return true;
         }
 
     }
@@ -206,11 +221,16 @@ public class Car implements ParkingAssistant{
     @Override
     public void Park() {
         /** Pseudo code */
-         // If the car is already parked we do not need to do anything
-         if (this.isParked){
-             return;
-         }
-         while (!this.isParked && this.xPosition < Utilities.parkingStreetLength - 100){
+        // If the car is already parked we do not need to do anything
+        if (this.isParked || this.xPosition < 5) {
+            return;
+        }
+        for (int i = 0; i < 5; i++) {
+            if (!this.registeredParkingPlaces.get(this.xPosition)) {
+                return;
+            }
+         /*
+         while (!this.isParked && this.xPosition < Utilities.parkingStreetLength - 1){
              Object[] status = MoveForward(); //Moves forward 1m, returns car's pos and situation of registered parking places
              //returned status is [1000,[0,3,6, ..., 71]] //e.g., available parking places are 0,3,6, ..., 71
              ArrayList<Integer> availablePP = (ArrayList<Integer>) status[1];
@@ -224,8 +244,12 @@ public class Car implements ParkingAssistant{
                  //this.reverseParallelParkingManeuver();
                  break;
              }
-         }
-         // what if we have still not parked??
+          */
+
+            // what if we have still not parked??
+        }
+        this.xPosition = this.xPosition-2;
+        this.isParked = true;
     }
 
     /**
@@ -244,13 +268,13 @@ public class Car implements ParkingAssistant{
          /** Pseudo code*/
            //Unpark the car only if it was parked
             if (this.isParked){
-               int driveUpto = this.xPosition + 500; //because 500cm is parking place's length
+               int driveUpto = this.xPosition + 5; //because 5m is parking place's length
                if (driveUpto > Utilities.parkingStreetLength){
                    driveUpto = Utilities.parkingStreetLength;
                }
                this.isParked = false;
                while (this.xPosition < driveUpto){
-                   MoveForward(); //Move forward 100cm at a time
+                   MoveForward(); //Move forward 1m at a time
                }
 
             }
@@ -274,11 +298,13 @@ public class Car implements ParkingAssistant{
      *
      * @return int Parking place on the RHS of the car valid value range from 0 to 99
      */
+    /*
     private int getParkingPlaceRHS(){
-        /** Pseudo Code */
+        /** Pseudo Code
         int place = this.xPosition;// / Utilities.parkingPlaceLength;
         return place;
     }
+    */
 
     public static void main(String[] args) {
       /*  Car[] mC = new Car[10];

@@ -1,5 +1,6 @@
 package com.tves;
 
+
 public interface Sensor {
     /**
      * @Description The sensor inputs are integers (in the range of 0 to 200)
@@ -11,7 +12,9 @@ public interface Sensor {
      *
      * @return: sensor data or its reading
      */
-    int getSensorData();
+    int getSensorData(boolean[] data, int position);
+
+
 
     /**
      * @Description If the sensor inputs are not in the range of 0 to 200, it indicates noise.

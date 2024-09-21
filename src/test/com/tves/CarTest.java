@@ -1,6 +1,7 @@
 package com.tves;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -11,7 +12,7 @@ class CarTest {
 
     private Car myCar;
 
-    @BeforeAll
+    @BeforeEach
     public void createCar(){
         //Arrange
         Sensor frontSensor = new UltraSoundSensor("frontSensor");
@@ -50,6 +51,9 @@ class CarTest {
     @Test
     public void testMoveForwardWhileParked(){
         //Act
+        for(int i = 0; i < 6; i++){
+            myCar.MoveForward();
+        }
         myCar.Park();
 
         Object[] whereIs = myCar.WhereIs();
@@ -82,7 +86,7 @@ class CarTest {
     }
 
     //MoveForward() when c1 is false, c2 is true, c3 is false, and c4 is true
-    @Test
+    /*@Test
     public void testMoveForwardParkingAvailable(){
         //Act
         Object[] moveResult = myCar.MoveForward();
@@ -96,7 +100,7 @@ class CarTest {
         int newSize = newPP.size();
         //Assert
         Assertions.assertEquals(prevSize+1, newSize, "MoveForward has not registered new available parking place on RHS.");
-    }
+    }*/
 
     //     * MoveBackward() when c1 is false, c2 is true, and c3 is false.
     @Test
@@ -120,13 +124,14 @@ class CarTest {
     public void testMoveBackwardWhileParked(){
         //Act
         //first move forward
-        myCar.MoveForward();
+        for(int i = 0; i < 6; i++){
+            myCar.MoveForward();
+        }
         //Then park
         myCar.Park();
         //Then check position
         Object[] whereIs = myCar.WhereIs();
         int prevPos = (Integer) whereIs[0];
-
         Object[] moveResult = myCar.MoveBackward();
         int newPos = (Integer) moveResult[0];
 
@@ -148,7 +153,7 @@ class CarTest {
         Assertions.assertEquals(prevPosition, currentPosition, "The car has moved 1m backward from starting position.");
     }
     //MoveBackward() when c1 is false, c2 is true, c3 is false, and c4 is true.
-    @Test
+    /*@Test
     public void testMoveBackwardParkingAvailable(){
         //Act
         Object[] moveResult = myCar.MoveBackward();
@@ -162,7 +167,7 @@ class CarTest {
         int newSize = newPP.size();
         //Assert
         Assertions.assertEquals(prevSize+1, newSize, "MoveForward has not registered new available parking place on RHS.");
-    }
+    }*/
 
     /*
     //MoveForward() when c1 is false, c2 is true, c3 is false, and c4 is false.

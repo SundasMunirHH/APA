@@ -1,5 +1,6 @@
 package com.tves;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class UltraSoundSensor implements Sensor{
 
@@ -14,9 +15,11 @@ public class UltraSoundSensor implements Sensor{
      * indicating the distance to the nearest object on the right.
      */
     @Override
-    public int getSensorData() {
-        // Return data from the sensor
-        return -1; // Example value in meters, <0 is no detection, > 200 is Noise
+    public int getSensorData(boolean[] data, int position) {
+        if(data[position] == false){
+            return (int) ((Math.random()*(55-45))+45);
+        }
+        return (int) ((Math.random()*(195-185))+185);
     }
 
     @Override
