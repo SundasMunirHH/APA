@@ -19,12 +19,9 @@ public interface Sensor {
     /**
      * @Description If the sensor inputs are not in the range of 0 to 200, it indicates noise.
      *
-     * @Pre-condition:
-     * @Post-condition:
-     * @Test-cases:
      * @return boolean value with true indicating noisy reading
      */
-    boolean isNoise(int value);
+    boolean isNoise(int[] sensorData);
 
     /**
      * @Description Aggregate valid readings/inputs from a sensor
