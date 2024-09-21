@@ -127,17 +127,17 @@ public class Car implements ParkingAssistant{
           // aggrDataFS == 0 -> another object is colliding
           // aggrDataFS > 0 -> noisy front sensor
         int aggrDataOneSensor;
-        if (aggrDataFS > 200 || aggrDataBS > 200){
+        if (frontSensor.isNoise(aggrDataFS) || backSensor.isNoise(aggrDataBS)){
             //we disregard data from noisy sensor
             // and assume the value of well-functioning sensor
-            if (aggrDataBS <= 200){
+            if (!backSensor.isNoise(aggrDataBS)){
                 aggrDataOneSensor = aggrDataBS;
             }
-            else if (aggrDataFS <= 200){
+            else if (!frontSensor.isNoise(aggrDataFS)){
                 aggrDataOneSensor = aggrDataFS;
             }else{
                 //Oops, both sensors are noisy
-                //lets assume there is no object detected
+                //lets assume there is no object detected in this case (for the timebeing)
                 aggrDataOneSensor = -1;
             }
         }

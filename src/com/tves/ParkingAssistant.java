@@ -13,9 +13,7 @@ public interface ParkingAssistant {
      * @Post-condition:
      * @Test-cases:
      *
-     * @param
      * @return A data structure [the current car position, the situation of the detected parking places up to now.]
-     * @throws ?IllegalArgumentException If what happens
      */
     public Object[] MoveForward();
 
