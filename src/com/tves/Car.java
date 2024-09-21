@@ -4,7 +4,7 @@ import java.util.ArrayList;
 public class Car implements ParkingAssistant{
 
     /** Two ultrasound sensors in the car.*/
-    private Sensor frontSensor, backSensor;
+    private Sensor frontSensor1, frontSensor2;
 
     /**
      * Car registers available parking places on the RHS (right hand side).
@@ -22,8 +22,8 @@ public class Car implements ParkingAssistant{
 
     /** Constructor to initialize the Car with a given parking street and two sensors.*/
     public Car(Sensor sensor1, Sensor sensor2) {
-        this.frontSensor = sensor1;
-        this.backSensor = sensor2;
+        this.frontSensor1 = sensor1;
+        this.frontSensor2 = sensor2;
         this.registeredParkingPlaces = new ArrayList<Integer>(); //ranges between [0,99] parking places
         this.isParked = false; //By default a car is not parked
         this.xPosition = 0; //at the start of the street on the driveway
@@ -112,29 +112,56 @@ public class Car implements ParkingAssistant{
         /** Pseudo code*/
           //The measurements from sensors are combined and filtered to reliably find a free parking stretch of 5 meters.
           //data from front and back sensors
-          int[] dataFromFS = new int[5];  // Array for front sensor data, at least five entries
-          int[] dataFromBS = new int[5];  // Array for back sensor data, at least five entries
+          int[] dataFromFS1 = new int[5];  // Array for front sensor data, at least five entries
+          int[] dataFromFS2 = new int[5];  // Array for back sensor data, at least five entries
           // query the sensors at least five times ...
           for (int i = 0; i < 5; i++){
-               dataFromFS[i] = this.frontSensor.getSensorData();
-               dataFromBS[i] = this.backSensor.getSensorData();
+               dataFromFS1[i] = this.frontSensor1.getSensorData();
+               dataFromFS2[i] = this.frontSensor2.getSensorData();
           }
           // get aggregated data
-          int aggrDataFS = this.frontSensor.aggregatedValue(dataFromFS);
-          int aggrDataBS = this.backSensor.aggregatedValue(dataFromBS);
+          int aggrDataFS1 = this.frontSensor1.aggregatedValue(dataFromFS1);
+          int aggrDataFS2 = this.frontSensor2.aggregatedValue(dataFromFS2);
           // we assume:
           // aggrDataFS == 1 -> another object is detected at 1 meters distance to the sensor.
           // aggrDataFS == 0 -> another object is colliding
           // aggrDataFS > 0 -> noisy front sensor
+        // Evaluating noisy data
+        boolean FS1, FS2 = true;
+        // decide on a threshold for the data to be considered noisy
+        int maxIndexFS1 = 0, maxIndexFS2 = 0, minIndexFS1 = 0, minIndexFS2 = 0, threshold = 0;
+        // finding max and min value to compare them and find if they are significant
+        for(int i = 0; i < dataFromFS1.length; i++){
+            // going through data set to search for the max and min value
+            if(dataFromFS1[i] >= dataFromFS1[maxIndexFS1]){
+                maxIndexFS1 = i;
+            }
+            if(dataFromFS1[i] <= dataFromFS1[minIndexFS1]){
+                minIndexFS1 = i;
+            }
+            if(dataFromFS2[i] >= dataFromFS2[maxIndexFS2]){
+                maxIndexFS2 = i;
+            }
+            if(dataFromFS2[i] <= dataFromFS2[minIndexFS2]){
+                minIndexFS2 = i;
+            }
+        }
+        // if the difference is high then the disregard sensor
+        if(dataFromFS1[maxIndexFS1]-dataFromFS1[minIndexFS1] > threshold){
+            FS1 = false;
+        }
+        if(dataFromFS1[maxIndexFS2]-dataFromFS1[minIndexFS2] > threshold){
+            FS2 = false;
+        }
         int aggrDataOneSensor;
-        if (frontSensor.isNoise(aggrDataFS) || backSensor.isNoise(aggrDataBS)){
+        if (frontSensor1.isNoise(aggrDataFS1) || frontSensor2.isNoise(aggrDataFS2)){
             //we disregard data from noisy sensor
             // and assume the value of well-functioning sensor
-            if (!backSensor.isNoise(aggrDataBS)){
-                aggrDataOneSensor = aggrDataBS;
+            if (!frontSensor2.isNoise(aggrDataFS2)){
+                aggrDataOneSensor = aggrDataFS2;
             }
-            else if (!frontSensor.isNoise(aggrDataFS)){
-                aggrDataOneSensor = aggrDataFS;
+            else if (!frontSensor1.isNoise(aggrDataFS1)){
+                aggrDataOneSensor = aggrDataFS1;
             }else{
                 //Oops, both sensors are noisy
                 //lets assume there is no object detected in this case (for the timebeing)
@@ -143,7 +170,7 @@ public class Car implements ParkingAssistant{
         }
         else{
             //both sensors are well-functioning, get average of both values.
-            aggrDataOneSensor = (aggrDataFS + aggrDataBS)/2;
+            aggrDataOneSensor = (aggrDataFS1 + aggrDataFS2)/2;
         }
         /*int distanceToObjectRHS;
           if (aggrDataFS < 0 && aggrDataBS < 0){
