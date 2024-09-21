@@ -30,7 +30,7 @@ public class Car implements ParkingAssistant{
     }
 
     /**
-     * moves the car 1 meter forward,
+     * moves the car 100 centimeter forward,
      * queries the two sensors through the isEmpty method
      * The car cannot be moved forward beyond the end of the street.
      *
@@ -43,20 +43,20 @@ public class Car implements ParkingAssistant{
             // do nothing if it is parked
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
-        // moves the car 1 meter forward until end of the street
-        if(this.xPosition < Utilities.parkingStreetLength - 1) {
+        // moves the car 100 centimeter forward until end of the street
+        if(this.xPosition < Utilities.parkingStreetLength - 100) {
             //we cannot let xPosition be 500, then position at RHS will be 100
-            this.xPosition += 1;
+            this.xPosition += 100;
         }
         // Register parking place on RHS of current position
         this.registerParkingPlace();
 
-        // Return a Pair/object with xPosition and situation of the detected available parking places such as [10,[0,1,3, ..., 86]]
+        // Return a Pair/object with xPosition and situation of the detected available parking places such as [1000,[0,1,3, ..., 86]]
         return new Object[]{this.xPosition, this.registeredParkingPlaces};
     }
 
     /**
-     * Finds 5m long empty stretch by querying two sensors through the isEmpty method and
+     * Finds 500 cm long empty stretch by querying two sensors through the isEmpty method and
      * registers parking place
      */
     private void registerParkingPlace(){
@@ -91,7 +91,7 @@ public class Car implements ParkingAssistant{
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
         if (this.xPosition > 0) {
-            this.xPosition -= 1;
+            this.xPosition -= 100;
         }
 
         // Register parking place on RHS of current position
@@ -105,7 +105,7 @@ public class Car implements ParkingAssistant{
      * If one sensor is detected to continuously return very noisy output, it should be completely disregarded.
      * You can use averaging or any other statistical method to filter the noise from the signals received from the ultrasound sensors.
      *
-     * @return boolean value as true if there is a parking stretch of 5m is found
+     * @return boolean value as true if there is a parking stretch of 500cm is found
      */
     @Override
     public int isEmpty() {
@@ -179,16 +179,16 @@ public class Car implements ParkingAssistant{
           }else{
               distanceToObjectRHS = aggrDataFS - aggrDataBS; //Math.abs(aggrDataFS - aggrDataBS);
           }*/
-          // To find a parking stretch of 5 meters, the front and back sensor values must span 5 meters
+          // To find a parking stretch of 500 centimeters, the front1 and front2 sensor values must span 500 centimeters
         return aggrDataOneSensor;
     }
 
     /** calls isEmpty method to get sensors data and estimate whether we have 5m long stretch available */
     private boolean isAvailableParkingPlace(){
         int distanceToObjectRHS = isEmpty();
-        if (distanceToObjectRHS < 0 || distanceToObjectRHS >= 5){
-            //we have a parking stretch of 5m, when either there are no objects detected or
-            //objects are detected at least 5m far away
+        if (distanceToObjectRHS < 0 || distanceToObjectRHS >= 500){
+            //we have a parking stretch of 500cm, when either there are no objects detected or
+            //objects are detected at least 500cm far away
             return true;
         }else{
             return false;
@@ -197,7 +197,7 @@ public class Car implements ParkingAssistant{
     }
 
     /**
-     * @Description: moves the car to the beginning of the current 5 meter free stretch of parking place, if it is already detected or
+     * @Description: moves the car to the beginning of the current 500 centimeter free stretch of parking place, if it is already detected or
      * moves the car forwards towards the end of the street until such a stretch is detected.
      * Then it performs a pre-programmed reverse parallel parking maneuver.
      *
@@ -210,9 +210,9 @@ public class Car implements ParkingAssistant{
          if (this.isParked){
              return;
          }
-         while (!this.isParked && this.xPosition < Utilities.parkingStreetLength -1){
+         while (!this.isParked && this.xPosition < Utilities.parkingStreetLength - 100){
              Object[] status = MoveForward(); //Moves forward 1m, returns car's pos and situation of registered parking places
-             //returned status is [10,[0,3,6, ..., 71]] //e.g., available parking places are 0,3,6, ..., 71
+             //returned status is [1000,[0,3,6, ..., 71]] //e.g., available parking places are 0,3,6, ..., 71
              ArrayList<Integer> availablePP = (ArrayList<Integer>) status[1];
              // Parking place on RHS of current position
              int parkingRHS = this.getParkingPlaceRHS();
@@ -244,13 +244,13 @@ public class Car implements ParkingAssistant{
          /** Pseudo code*/
            //Unpark the car only if it was parked
             if (this.isParked){
-               int driveUpto = this.xPosition + 5; //because 5m is parking place's length
+               int driveUpto = this.xPosition + 500; //because 500cm is parking place's length
                if (driveUpto > Utilities.parkingStreetLength){
                    driveUpto = Utilities.parkingStreetLength;
                }
                this.isParked = false;
                while (this.xPosition < driveUpto){
-                   MoveForward(); //Move forward 1m at a time
+                   MoveForward(); //Move forward 100cm at a time
                }
 
             }
@@ -295,8 +295,8 @@ public class Car implements ParkingAssistant{
       * We assume that the car is moving along a perfectly straight street which is 500 meters long
       * and registers the available parking places on its right-hand side.
       * To do this the car moves forward and uses two ultrasound sensors to check whether there is a free space on its right hand side.
-      * The measurements are combined and filtered to reliably find a free parking stretch of 5 meters.
-      * The car then moves to the end of the 5 meter stretch and runs a standard parallel reverse parking maneuver.
+      * The measurements are combined and filtered to reliably find a free parking stretch of 500 centimeters.
+      * The car then moves to the end of the 500 centimeter stretch and runs a standard parallel reverse parking maneuver.
       */
     }
 }
