@@ -97,15 +97,15 @@ public class Car implements ParkingAssistant{
     @Override
     public int isEmpty() {
         /** Pseudo code*/
-          //The measurements from sensors are combined and filtered to reliably find a free parking stretch of 5 meters.
-          //data from front and back sensors
-          int[] dataFromFS1 = new int[5];  // Array for front sensor data, at least five entries
-          int[] dataFromFS2 = new int[5];  // Array for back sensor data, at least five entries
-          // query the sensors at least five times ...
-          for (int i = 0; i < 5; i++){
-               dataFromFS1[i] = this.frontSensor1.getSensorData(this.parking,this.xPosition);
-               dataFromFS2[i] = this.frontSensor2.getSensorData(this.parking,this.xPosition);
-          }
+        //The measurements from sensors are combined and filtered to reliably find a free parking stretch of 5 meters.
+        //data from front and back sensors
+        int[] dataFromFS1 = new int[5];  // Array for front sensor data, at least five entries
+        int[] dataFromFS2 = new int[5];  // Array for back sensor data, at least five entries
+        // query the sensors at least five times ...
+        for (int i = 0; i < 5; i++){
+            dataFromFS1[i] = this.frontSensor1.getSensorData(this.parking,this.xPosition);
+            dataFromFS2[i] = this.frontSensor2.getSensorData(this.parking,this.xPosition);
+        }
         boolean isFS1Noisy, isFS2Noisy;
         isFS1Noisy = frontSensor1.isNoise(dataFromFS1);
         isFS2Noisy = frontSensor2.isNoise(dataFromFS2);
@@ -125,6 +125,36 @@ public class Car implements ParkingAssistant{
                 aggrDataOneSensor = -1;
             }
         }
+        /*
+
+        // Evaluating noisy data
+        boolean FS1, FS2 = true;
+        // decide on a threshold for the data to be considered noisy
+        int maxIndexFS1 = 0, maxIndexFS2 = 0, minIndexFS1 = 0, minIndexFS2 = 0, threshold = 0;
+        // finding max and min value to compare them and find if they are significant
+        for(int i = 0; i < dataFromFS1.length; i++){
+            // going through data set to search for the max and min value
+            if(dataFromFS1[i] >= dataFromFS1[maxIndexFS1]){
+                maxIndexFS1 = i;
+            }
+            if(dataFromFS1[i] <= dataFromFS1[minIndexFS1]){
+                minIndexFS1 = i;
+            }
+            if(dataFromFS2[i] >= dataFromFS2[maxIndexFS2]){
+                maxIndexFS2 = i;
+            }
+            if(dataFromFS2[i] <= dataFromFS2[minIndexFS2]){
+                minIndexFS2 = i;
+            }
+        }
+        // if the difference is high then the disregard sensor
+        if(dataFromFS1[maxIndexFS1]-dataFromFS1[minIndexFS1] > threshold){
+            FS1 = false;
+        }
+        if(dataFromFS1[maxIndexFS2]-dataFromFS1[minIndexFS2] > threshold){
+            FS2 = false;
+        }
+*/
         else{
             //both sensors are well-functioning, get average of both values.
             // get aggregated data
@@ -178,20 +208,20 @@ public class Car implements ParkingAssistant{
      */
     @Override
     public void UnPark() {
-         /** Pseudo code*/
-           //Unpark the car only if it was parked
-            if (this.isParked){
-               int driveUpto = this.xPosition + 2; //because we drive 2m back for parking
-               //Testcase: Corresponding to the test case of unparking at the end of the street "testUnParkAtEndOfStreet".
+        /** Pseudo code*/
+        //Unpark the car only if it was parked
+        if (this.isParked){
+            int driveUpto = this.xPosition + 2; //because we drive 2m back for parking
+            //Testcase: Corresponding to the test case of unparking at the end of the street "testUnParkAtEndOfStreet".
               /*  if (driveUpto >= Utilities.parkingStreetLength){
                    driveUpto = Utilities.parkingStreetLength - 1;
                }*/
-               this.isParked = false;
-               //Since the car must move forward (and to the left) to get back on the drive area
-               while (this.xPosition < driveUpto){
-                   MoveForward(); //Move forward 1m at a time
-               }
+            this.isParked = false;
+            //Since the car must move forward (and to the left) to get back on the drive area
+            while (this.xPosition < driveUpto){
+                MoveForward(); //Move forward 1m at a time
             }
+        }
     }
 
     /**
@@ -210,9 +240,9 @@ public class Car implements ParkingAssistant{
      * @return boolean[]
      */
     public boolean[] setParkingPlaces(int mod, int n){
-    //Setting some parking places to be available and unavailable
+        //Setting some parking places to be available and unavailable
         for(int i = 0; i < this.parking.length; i++){
-        //Setting all parking places occupied by mod = 1 n = 0.
+            //Setting all parking places occupied by mod = 1 n = 0.
             if(i%mod == n || i%mod == n+1 || i%mod == n+2){
                 this.parking[i] = false;
             }
