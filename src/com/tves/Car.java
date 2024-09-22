@@ -15,11 +15,6 @@ public class Car implements ParkingAssistant {
     private ArrayList<Boolean> registeredParkingPlaces;
 
     /**
-     * Pre-programmed occupied parking places on the RHS.
-     */
-    //private boolean[] parking;
-
-    /**
      * Indicates whether the car is currently parked.
      */
     private boolean isParked;
@@ -31,22 +26,24 @@ public class Car implements ParkingAssistant {
     private int xPosition;
 
     /**
-     * Constructor to initialize the Car with a given parking street and two sensors.
+     * Constructor to initialize the Car with two sensors.
      */
     public Car(Sensor sensor1, Sensor sensor2) {
+        //testcase: testConstructor, Assert 1
         this.frontSensor1 = sensor1;
         this.frontSensor2 = sensor2;
+
+        //testcase: testMoveForward, Assert 2
         this.registeredParkingPlaces = new ArrayList<Boolean>(); //ranges between [0,499] parking places
         for (int i = 0; i < 500; i++) {
             registeredParkingPlaces.add(false);
         }
+
+        //testcase: testConstructor, Assert 2
         this.isParked = false; //By default the car is not parked
+
+        //testcase: testConstructor, Assert 3
         this.xPosition = 0; //at the start of the street on the driveway
-        //All parking places
-        //this.parking = new boolean[500];
-        for (int i = 2; i < 500; i++) {
-            this.setParkingPlaces(i, true);
-        }
     }
 
     /**
@@ -58,20 +55,25 @@ public class Car implements ParkingAssistant {
      */
     @Override
     public Object[] MoveForward() {
-        /** Pseudo code*/
+        //testcase: testMoveForwardWhileParked
         if (this.isParked) {
             // do nothing if it is parked
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
+
+        //testcase: testMoveForward, Assert 1
         // moves the car 100 centimeter forward until end of the street
-        if (this.xPosition < Utilities.parkingStreetLength - 1) {
+        if (this.xPosition < Utilities.parkingStreetLength - 1) {//testcase: testMoveForwardAtEndOfStreet
             //we cannot let xPosition be 500,
             this.xPosition += 1;
         }
+
+        //testcase: testMoveForward, Assert 2
         // Register parking place on RHS of current position
         this.registeredParkingPlaces.set(this.xPosition, isAvailableParkingPlace());
 
-        // Return a Pair/object with xPosition and situation of the detected available parking places such as [1000,[0,1,3, ..., 86]]
+        //testcase: testMoveForward, Assert 1 and Assert 2
+        // Return a Pair/object with xPosition and situation of the detected available parking places such as [1000,[true,true,false, false, ..., false]]
         return new Object[]{this.xPosition, this.registeredParkingPlaces};
     }
 
@@ -79,40 +81,43 @@ public class Car implements ParkingAssistant {
      * moves the car 1 meter backwards,
      * The car cannot be moved behind if it is already at the beginning of the street.
      *
-     * @throws IllegalArgumentException If what happens
      */
     @Override
     public Object[] MoveBackward() {
-        /** Pseudo code*/
+        //testcase: testMoveBackwardWhileParked
         if (this.isParked) {
             // do nothing if it is parked
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
+
+        //testcase: testMoveBackwardAtStartOfStreet
         if (this.xPosition > 0) {
             this.xPosition -= 1;
         }
 
+        //testcase: testMoveBackward, Assert 2
         // Register parking place on RHS of current position
         this.registeredParkingPlaces.set(this.xPosition, isAvailableParkingPlace());
 
+        //testcase: testMoveBackward, Assert 1 and Assert 2
         return new Object[]{this.xPosition, this.registeredParkingPlaces};
     }
 
     /**
-     * @return distance to the nearest object in centimeters
      * @Description queries the two ultrasound sensors at least 5 times, filters the noise in their results,
      * If one sensor is detected to continuously return very noisy output, it should be completely disregarded.
      * You can use averaging or any other statistical method to filter the noise from the signals received from the ultrasound sensors.
+     * @return distance to the nearest object in centimeters
      */
     @Override
     public int isEmpty() {
-        /** Pseudo code*/
-        //The measurements from sensors are combined and filtered to reliably find a free parking stretch of 5 meters.
-        //data from front and back sensors
+        //testcase: testisEmpty
+        //data from both sensors
         int[] dataFromFS1 = new int[5];  // Array for front sensor data, at least five entries
         int[] dataFromFS2 = new int[5];  // Array for back sensor data, at least five entries
-        // query the sensors at least five times ...
-        for (int i = 0; i < 5; i++) {
+
+        //testcase: testisEmptyNoisySensor
+        for (int i = 0; i < 5; i++) {// query the sensors at least five times ...
             dataFromFS1[i] = this.frontSensor1.getSensorData(this.xPosition, Utilities.noiseS1);
             dataFromFS2[i] = this.frontSensor2.getSensorData(this.xPosition, Utilities.noiseS2);
         }
@@ -128,17 +133,18 @@ public class Car implements ParkingAssistant {
             } else if (!isFS2Noisy) {
                 aggrDataOneSensor = this.frontSensor2.aggregatedValue(dataFromFS2);
             } else {
-                //Oops, both sensors are noisy, currently we assume this never happens
+                //testcase: testisEmptyNoisySensor
                 //lets assume there is no object detected in this case (for the time being)
                 aggrDataOneSensor = -1;
             }
         } else {
+            //testcase: testisEmpty
             //both sensors are well-functioning, get average of both values.
-            // get aggregated data
             int aggrDataFS1 = this.frontSensor1.aggregatedValue(dataFromFS1);
             int aggrDataFS2 = this.frontSensor2.aggregatedValue(dataFromFS2);
             aggrDataOneSensor = (aggrDataFS1 + aggrDataFS2) / 2;
         }
+        //testcase: testisEmpty
         return aggrDataOneSensor;
     }
 
@@ -146,15 +152,17 @@ public class Car implements ParkingAssistant {
      * calls isEmpty method to get sensors data and estimate whether we have 5m long stretch available
      */
     private boolean isAvailableParkingPlace() {
+        //testcase: testMoveForward, Assert 2 and testMoveBackward, Assert 2
         int distanceToObjectRHS = isEmpty();
         if (distanceToObjectRHS <= 60) {
+            //testcase: testParkWhileParked
             //If the sensors gives a distance of 60 cm or less then the specific meter of space is occupied
             //otherwise the spot is considered empty
             return false;
         } else {
+            //testcase: testMoveForward, Assert 2 and testMoveBackward, Assert 2
             return true;
         }
-
     }
 
     /**
@@ -164,10 +172,13 @@ public class Car implements ParkingAssistant {
      */
     @Override
     public void Park() {
+        //testcase: testParkWhileParked and testParkAtStart, Assert 1 ans 2
         // If the car is already parked we do not need to do anything
         if (this.isParked || this.xPosition < 5) {
             return;
         }
+
+        //testcase: testParkWithNoParkingAvailable
         //check the last 5 meters from the current xPosition in the registered parking places
         for (int i = 0; i < 5; i++) {
             if (!this.registeredParkingPlaces.get(this.xPosition - i)) {
@@ -175,8 +186,14 @@ public class Car implements ParkingAssistant {
                 return;
             }
         }
+
+        //testcase: testPark, Assert 2
         this.xPosition = this.xPosition - 2;
+
+        //testcase: testPark, Assert 3
         setParkingPlaces(this.xPosition, false);
+
+        //testcase: testPark, Assert 1
         this.isParked = true;
     }
 
@@ -186,50 +203,42 @@ public class Car implements ParkingAssistant {
      */
     @Override
     public void UnPark() {
-        /** Pseudo code*/
-        //Unpark the car only if it was parked
-        if (this.isParked) {
-            int driveUpto = this.xPosition + 2; //because we drove 2m back for parking, to unpark we drive 2m forward
-            //Testcase: Corresponding to the test case of unparking at the end of the street "testUnParkAtEndOfStreet".
+        //testcase: testUnParkWhileNotParked
+        if (this.isParked) { //Unpark the car only if it was parked
+
+            //testcase: testUnPark, Assert 1.
             this.isParked = false;
-            //Unparking from the parking places
-            setParkingPlaces(this.xPosition, true);
+
+            //testcase: testUnPark, Assert 3.
+            setParkingPlaces(this.xPosition, true);//Unparking from the parking places
+
+            //testcase: testUnPark, Assert 2
             //Since the car must move forward (and to the left) to get back on the drive area
+            int driveUpto = this.xPosition + 2; //because we drove 2m back for parking, to unpark we drive 2m forward
             while (this.xPosition < driveUpto) {
                 MoveForward(); //Move forward 1m at a time
             }
-
         }
     }
 
     /**
      * @return current position of the car in the street and its situation (whether it is parked or not).
-     * @throws IllegalArgumentException If what happens
      */
     @Override
     public Object[] WhereIs() {
+        //testcase: this is tested with many JUnit tests, such as
+        // testParkAtStart, testPark, testParkWhileParked, testParkWithNoParkingAvailable, testUnPark
         return new Object[]{this.xPosition, this.isParked};
     }
 
     /**
-     * @return boolean[]
-     * @Description: sets the occupied parking places on street manually, to set all parking places on
-     * street as occupied, mod = 500 and n = 500
+     * @Description: sets the occupied/unoccupied parking places on parking street,
      */
-    private void setParkingPlaces(int xPos, boolean value) { //(int mod, int n,boolean value){
+    private void setParkingPlaces(int xPos, boolean value) {
+        //testcase: testUnPark Assert 3, and testPark, Assert 3
         //Setting some parking places to be available and unavailable
         Utilities.parking[xPos] = value;
         Utilities.parking[xPos - 1] = value;
         Utilities.parking[xPos - 2] = value;
-
-       /* for(int i = 0; i < this.parking.length; i++){
-            //Setting all parking places occupied by mod = 1 n = 0.
-            if(i%mod == n || i%mod == n+1 || i%mod == n+2){
-                this.parking[i] = false;
-            }
-            else{
-                this.parking[i] = true;
-            }
-        }*/
     }
 }

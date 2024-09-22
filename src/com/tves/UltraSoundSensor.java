@@ -1,8 +1,5 @@
 package com.tves;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 public class UltraSoundSensor implements Sensor {
 
     /**
@@ -27,7 +24,7 @@ public class UltraSoundSensor implements Sensor {
         int closesObjectAtRHS = endingRange + 1; //starting with a bigger value
         for (int i = startingRange; i <= endingRange; i++) {
             if (!Utilities.parking[i]) {//the position within 200 meter is occupied
-                //what is the shortest +ve distance to occupied spot
+                //what is the shortest +ive distance to occupied spot
                 int dis = Math.abs(position - i);
                 if (closesObjectAtRHS > dis) {
                     closesObjectAtRHS = dis;
@@ -35,6 +32,7 @@ public class UltraSoundSensor implements Sensor {
             }
         }
         //We need test cases where we deliberately introduce noise to some sensors
+        //A well functioning sensor has 0 noise.
         closesObjectAtRHS = closesObjectAtRHS + (int) (Math.random() * noise);
         return closesObjectAtRHS;
       /*  if(!data[position]){
@@ -67,12 +65,6 @@ public class UltraSoundSensor implements Sensor {
 
     @Override
     public int aggregatedValue(int[] readings) {
-        // If too many noisy readings, disregard this sensor
-        if (isNoise(readings)) { // Arbitrary threshold: if less than 3 valid readings, ignore
-            System.out.println(this.sensorName + " produced noisy data and will be disregarded.");
-            return -1;
-        }
-
         // Calculate the average of valid readings
         int sum = 0;
         for (int reading : readings) {

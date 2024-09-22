@@ -1,9 +1,8 @@
 package com.tves;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
+
+import java.util.ArrayList;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -17,6 +16,11 @@ class CarTest {
         Sensor sensor1 = new UltraSoundSensor("sensor1");
         Sensor sensor2 = new UltraSoundSensor("sensor2");
         this.myCar = new Car(sensor1, sensor2);
+
+        //Set all parking places to be available ebfore each test case
+        for (int i = 0; i < 500; i++) {
+            Utilities.parking[i] = true;
+        }
     }
 
     // Testing the constructor or initialization of a car
@@ -27,13 +31,25 @@ class CarTest {
         Sensor sensor1 = new UltraSoundSensor("sensor1");
         Sensor sensor2 = new UltraSoundSensor("sensor2");
         Car aCar = new Car(sensor1, sensor2);
+
+        //Assert 1
         Assertions.assertInstanceOf(Car.class, aCar, "Car is not initialized as an object of Car");
+
+        //Testing initialization of car at an expected state
+        Object[] whereIs = myCar.WhereIs();
+        int startingPosition = (Integer) whereIs[0];
+        boolean isParked = (Boolean) whereIs[1];
+
+        //Assert 2
+        Assertions.assertFalse(isParked, "The car has initiated with parked state.");
+
+        //Assert 3
+        Assertions.assertEquals(0, startingPosition, "The car has not initiated at position 0.");
     }
 
     //MoveForward() when c1 is false, c2 is true, and c3 is false from decision table.
     @Test
     public void testMoveForward() {
-        //myCar.setParkingPlaces(10, 7);
         //Arrange
         Object[] whereIs = myCar.WhereIs();
         int prevPosition = (Integer) whereIs[0];
@@ -41,15 +57,18 @@ class CarTest {
         //Act
         Object[] moveResult = myCar.MoveForward();
         int currentPosition = (Integer) moveResult[0];
+        ArrayList<Boolean> registeredPP = (ArrayList<Boolean>) moveResult[1];
 
-        //Assert
+        //Assert 1
         Assertions.assertEquals(prevPosition + 1, currentPosition, "The car has not moved 1m forward.");
+
+        //Assert 2
+        Assertions.assertEquals(500, registeredPP.size(), "Move forward has not been able to register 500 parking places.");
     }
 
     //MoveForward() when c1 is true.
     @Test
     public void testMoveForwardWhileParked() {
-        //myCar.setParkingPlaces(10, 7);
         //Act
         for (int i = 0; i < 6; i++) {
             myCar.MoveForward();
@@ -69,7 +88,6 @@ class CarTest {
     //MoveForward() when c1 is false, c2 is true, and c3 is true.
     @Test
     public void testMoveForwardAtEndOfStreet() {
-        //myCar.setParkingPlaces(10, 7);
         //Act
         Object[] whereIs = myCar.WhereIs();
         int prevPos = (Integer) whereIs[0];
@@ -98,16 +116,19 @@ class CarTest {
         //then move backwards
         Object[] moveResult = myCar.MoveBackward();
         int currentPosition = (Integer) moveResult[0];
+        ArrayList<Boolean> registeredPP = (ArrayList<Boolean>) moveResult[1];
 
-        //Assert
+        //Assert 1
         Assertions.assertEquals(prevPosition - 1, currentPosition, "The car has moved 1m backward.");
+
+        //Assert 2
+        Assertions.assertEquals(500, registeredPP.size(), "Move backward has not been able to register parking places.");
 
     }
 
     //MoveBackward() when c1 is true.
     @Test
     public void testMoveBackwardWhileParked() {
-        //myCar.setParkingPlaces(10, 7);
         //Act
         //first move forward
         for (int i = 0; i < 6; i++) {
@@ -152,18 +173,17 @@ class CarTest {
         //Act
         Utilities.noiseS1 = 100;
         Utilities.noiseS2 = 0;
-        int distance = myCar.isEmpty();
+        myCar.isEmpty();
         //We can just check the line coverage, there is nothing to assert in this case
 
         Utilities.noiseS1 = 0;
         Utilities.noiseS2 = 100;
-        distance = myCar.isEmpty();
-        //Assert
+        myCar.isEmpty();
         //We can just check the line coverage, there is nothing to assert in this case
 
         Utilities.noiseS1 = 100;
         Utilities.noiseS2 = 100;
-        distance = myCar.isEmpty();
+        int distance = myCar.isEmpty();
 
         //Assert
         Assertions.assertEquals(-1, distance, "The empty method still returns a valid distance when both sensors are noisy.");
@@ -185,10 +205,11 @@ class CarTest {
         boolean isParked = (Boolean) whereIs[1];
         int newPos = (Integer) whereIs[0];
 
-        //Assert
+        //Assert 1
         Assertions.assertFalse(isParked, "The car has parked at the beginning of the street (before driving 5m).");
+
         //Since the position of the car moves 2m backwards when it parks, we further check the postion as well
-        //Assert
+        //Assert 2
         Assertions.assertEquals(prevPos, newPos, "The car has parked.");
     }
 
@@ -210,11 +231,15 @@ class CarTest {
         boolean isParked = (Boolean) whereIs[1];
         int newPos = (Integer) whereIs[0];
 
-        //Assert
+        //Assert 1
         Assertions.assertTrue(isParked, "The car has not parked.");
         //Since the position of the car moves 2m backwards when it parks, we further check the postion as well
-        //Assert
+
+        //Assert 2
         Assertions.assertEquals(prevPos - 2, newPos, "The car has not parked.");
+
+        //Assert 3
+        Assertions.assertFalse(Utilities.parking[newPos], "The parking place on RHS is not occupied.");
     }
 
     //Park() when c1 is true, we name this method “testParkWhileParked()”
@@ -239,6 +264,7 @@ class CarTest {
 
         //Assert
         Assertions.assertEquals(prevPos, newPos, "The car has tried to park again.");
+
     }
 
     //Park() when c1 is false, c2 is false, c3 is false. We name this method “testParkWithNoParkingAvailable()”
@@ -299,11 +325,14 @@ class CarTest {
         boolean isParked = (Boolean) whereIs[1];
         int newPos = (Integer) whereIs[0];
 
-        //Assert
+        //Assert 1
         Assertions.assertFalse(isParked, "The car is still parked.");
 
-        //Assert - we gotta move 2m forward when unparking
+        //Assert 2 - we gotta move 2m forward when unparking
         Assertions.assertEquals(prevPos + 2, newPos, "The car is still parked and has not changed in position.");
+
+        //Assert 3
+        Assertions.assertTrue(Utilities.parking[newPos], "The parking place on RHS is still occupied after unparking.");
     }
 
     // UnPark() when c1 is false. We name this method “testUnParkWhileNotParked()”
@@ -322,7 +351,6 @@ class CarTest {
     // UnPark() at the end of the street”
     @Test
     public void testUnParkAtEndOfStreet() {
-        //myCar.setParkingPlaces(499, 499);
         //Arrange
         //we must first park in order to test unPark, and we must drive at least 5m to successfully park
         for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
