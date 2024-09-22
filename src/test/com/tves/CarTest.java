@@ -1,4 +1,5 @@
 package com.tves;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ class CarTest {
     private Car myCar;
 
     @BeforeEach
-    public void createCar(){
+    public void createCar() {
         //Arrange
         Sensor sensor1 = new UltraSoundSensor("sensor1");
         Sensor sensor2 = new UltraSoundSensor("sensor2");
@@ -21,18 +22,18 @@ class CarTest {
     // Testing the constructor or initialization of a car
     @Test
     public void testConstructor() {
-    //Test initialization of car
+        //Test initialization of car
         //Act
         Sensor sensor1 = new UltraSoundSensor("sensor1");
         Sensor sensor2 = new UltraSoundSensor("sensor2");
         Car aCar = new Car(sensor1, sensor2);
-        Assertions.assertInstanceOf(Car.class, aCar,"Car is not initialized as an object of Car");
+        Assertions.assertInstanceOf(Car.class, aCar, "Car is not initialized as an object of Car");
     }
 
     //MoveForward() when c1 is false, c2 is true, and c3 is false from decision table.
     @Test
     public void testMoveForward() {
-        myCar.setParkingPlaces(10, 7);
+        //myCar.setParkingPlaces(10, 7);
         //Arrange
         Object[] whereIs = myCar.WhereIs();
         int prevPosition = (Integer) whereIs[0];
@@ -42,15 +43,15 @@ class CarTest {
         int currentPosition = (Integer) moveResult[0];
 
         //Assert
-        Assertions.assertEquals(prevPosition+1, currentPosition, "The car has not moved 1m forward.");
+        Assertions.assertEquals(prevPosition + 1, currentPosition, "The car has not moved 1m forward.");
     }
 
     //MoveForward() when c1 is true.
     @Test
-    public void testMoveForwardWhileParked(){
-        myCar.setParkingPlaces(10, 7);
+    public void testMoveForwardWhileParked() {
+        //myCar.setParkingPlaces(10, 7);
         //Act
-        for(int i = 0; i < 6; i++){
+        for (int i = 0; i < 6; i++) {
             myCar.MoveForward();
         }
         myCar.Park();
@@ -67,13 +68,13 @@ class CarTest {
 
     //MoveForward() when c1 is false, c2 is true, and c3 is true.
     @Test
-    public void testMoveForwardAtEndOfStreet(){
-        myCar.setParkingPlaces(10, 7);
+    public void testMoveForwardAtEndOfStreet() {
+        //myCar.setParkingPlaces(10, 7);
         //Act
         Object[] whereIs = myCar.WhereIs();
         int prevPos = (Integer) whereIs[0];
         //move forward until end of the street
-        while(prevPos < Utilities.parkingStreetLength - 1){
+        while (prevPos < Utilities.parkingStreetLength - 1) {
             Object[] moveResult = myCar.MoveForward();
             prevPos = (Integer) moveResult[0];
         }
@@ -87,8 +88,8 @@ class CarTest {
 
     //     * MoveBackward() when c1 is false, c2 is true, and c3 is false.
     @Test
-    public void testMoveBackward(){
-        myCar.setParkingPlaces(10, 7);
+    public void testMoveBackward() {
+        //myCar.setParkingPlaces(10, 7);
         //Act
         //first move forward
         myCar.MoveForward();
@@ -99,22 +100,22 @@ class CarTest {
         int currentPosition = (Integer) moveResult[0];
 
         //Assert
-        Assertions.assertEquals(prevPosition-1, currentPosition, "The car has moved 1m backward.");
+        Assertions.assertEquals(prevPosition - 1, currentPosition, "The car has moved 1m backward.");
 
     }
 
     //MoveBackward() when c1 is true.
     @Test
-    public void testMoveBackwardWhileParked(){
-        myCar.setParkingPlaces(10, 7);
+    public void testMoveBackwardWhileParked() {
+        //myCar.setParkingPlaces(10, 7);
         //Act
         //first move forward
-        for(int i = 0; i < 6; i++){
+        for (int i = 0; i < 6; i++) {
             myCar.MoveForward();
         }
-        //Then park
+        //Then park the car
         myCar.Park();
-        //Then check position
+        //Then check car's position
         Object[] whereIs = myCar.WhereIs();
         int prevPos = (Integer) whereIs[0];
         Object[] moveResult = myCar.MoveBackward();
@@ -126,7 +127,7 @@ class CarTest {
 
     // MoveBackward() when c1 is false, c2 is true, and c3 is true.
     @Test
-    public void testMoveBackwardAtStartOfStreet(){
+    public void testMoveBackwardAtStartOfStreet() {
         Object[] whereIs = myCar.WhereIs();
         int prevPosition = (Integer) whereIs[0];
 
@@ -139,16 +140,41 @@ class CarTest {
     }
 
     @Test
-    public void testisEmpty(){
+    public void testisEmpty() {
         //Act
         int distance = myCar.isEmpty();
         //Assert
-        Assertions.assertNotNull(distance, "The sensor data is null.");
+        Assertions.assertNotEquals(-1, distance, "The sensor data is noisy.");
+    }
+
+    @Test
+    public void testisEmptyNoisySensor() {
+        //Act
+        Utilities.noiseS1 = 100;
+        Utilities.noiseS2 = 0;
+        int distance = myCar.isEmpty();
+        //We can just check the line coverage, there is nothing to assert in this case
+
+        Utilities.noiseS1 = 0;
+        Utilities.noiseS2 = 100;
+        distance = myCar.isEmpty();
+        //Assert
+        //We can just check the line coverage, there is nothing to assert in this case
+
+        Utilities.noiseS1 = 100;
+        Utilities.noiseS2 = 100;
+        distance = myCar.isEmpty();
+
+        //Assert
+        Assertions.assertEquals(-1, distance, "The empty method still returns a valid distance when both sensors are noisy.");
+
+        Utilities.noiseS1 = 0;
+        Utilities.noiseS2 = 0;
     }
 
     //Park() when c1 is false, c2 is true. We name this method “testParkAtStart()”
     @Test
-    public void testParkAtStart(){
+    public void testParkAtStart() {
         //Arrange
         Object[] whereIs = myCar.WhereIs();
         int prevPos = (Integer) whereIs[0];
@@ -163,16 +189,16 @@ class CarTest {
         Assertions.assertFalse(isParked, "The car has parked at the beginning of the street (before driving 5m).");
         //Since the position of the car moves 2m backwards when it parks, we further check the postion as well
         //Assert
-        Assertions.assertEquals(prevPos,newPos, "The car has parked.");
+        Assertions.assertEquals(prevPos, newPos, "The car has parked.");
     }
 
     //Park() when c1 is false, c2 is false, c3 is true. We name this method “testPark()”
     @Test
-    public void testPark(){
-        myCar.setParkingPlaces(10, 7);
+    public void testPark() {
+        //myCar.setParkingPlaces(10, 7);
         //Arrange
         //we first drive at least 5 meters ahead on the road
-        for (int i =0; i<5;i++){
+        for (int i = 0; i < 5; i++) {
             myCar.MoveForward();
         }
         Object[] whereIs = myCar.WhereIs();
@@ -188,16 +214,16 @@ class CarTest {
         Assertions.assertTrue(isParked, "The car has not parked.");
         //Since the position of the car moves 2m backwards when it parks, we further check the postion as well
         //Assert
-        Assertions.assertEquals(prevPos-2,newPos, "The car has not parked.");
+        Assertions.assertEquals(prevPos - 2, newPos, "The car has not parked.");
     }
 
     //Park() when c1 is true, we name this method “testParkWhileParked()”
     @Test
-    public void testParkWhileParked(){
-        myCar.setParkingPlaces(10, 7);
+    public void testParkWhileParked() {
+        //myCar.setParkingPlaces(10, 7);
         //Arrange
         //we first drive at least 5meters ahead on the road
-        for (int i =0; i<5;i++){
+        for (int i = 0; i < 5; i++) {
             myCar.MoveForward();
         }
         //Act
@@ -217,26 +243,38 @@ class CarTest {
 
     //Park() when c1 is false, c2 is false, c3 is false. We name this method “testParkWithNoParkingAvailable()”
     @Test
-    public void testParkWithNoParkingAvailable(){
-        myCar.setParkingPlaces(1, 0);
+    public void testParkWithNoParkingAvailable() {
         //Arrange
-        //we first drive at a spot where parking is occupied
-        //Since we have deliberately made the parking unavailable if(i%10 == 7 || i%10 == 8 || i%10 == 9){
+        //we first create another car and park it at a specific parking place
+        Sensor sensor1 = new UltraSoundSensor("sensor1");
+        Sensor sensor2 = new UltraSoundSensor("sensor2");
+        Car aCar = new Car(sensor1, sensor2);
+        //move a car to the first parking place
+        for (int i = 0; i < 5; i++) {
+            aCar.MoveForward();
+        }
+        //park the car at the first parking place
+        aCar.Park();
+        Object[] whereIs = aCar.WhereIs();
+        boolean isParked = (Boolean) whereIs[1];
 
-        for (int i =0; i<18;i++){
+        //Now drive our car at the same spot where parking is occupied
+        //myCar.setParkingPlaces(1, 0);
+        for (int i = 0; i < 5; i++) {
             myCar.MoveForward();
         }
-        Object[] whereIs = myCar.WhereIs();
+        whereIs = myCar.WhereIs();
         int prevPos = (Integer) whereIs[0];
 
         //Act
         myCar.Park();
         whereIs = myCar.WhereIs();
         int newPos = (Integer) whereIs[0];
-        boolean isParked = (Boolean) whereIs[1];
+        isParked = (Boolean) whereIs[1];
+        System.out.println("Is second car parked? " + isParked);
 
         //Assert
-        Assertions.assertFalse(isParked, "The car has parked at when no parking is available.");
+        Assertions.assertFalse(isParked, "The car has parked where no parking is available.");
 
         //Assert
         Assertions.assertEquals(prevPos, newPos, "The car has tried to park twice.");
@@ -244,11 +282,11 @@ class CarTest {
 
     // UnPark() when c1 is true. We name this method “testUnPark()”
     @Test
-    public void testUnPark(){
-        myCar.setParkingPlaces(10, 7);
+    public void testUnPark() {
+        //myCar.setParkingPlaces(10, 7);
         //Arrange
         //we must first park in order to test unPark, and we must drive at least 5m to successfully park
-        for (int i =0; i<5;i++){
+        for (int i = 0; i < 5; i++) {
             myCar.MoveForward();
         }
         myCar.Park();
@@ -265,13 +303,13 @@ class CarTest {
         Assertions.assertFalse(isParked, "The car is still parked.");
 
         //Assert - we gotta move 2m forward when unparking
-        Assertions.assertEquals(prevPos+2, newPos, "The car is still parked and has not changed in position.");
+        Assertions.assertEquals(prevPos + 2, newPos, "The car is still parked and has not changed in position.");
     }
 
     // UnPark() when c1 is false. We name this method “testUnParkWhileNotParked()”
     @Test
-    public void testUnParkWhileNotParked(){
-        myCar.setParkingPlaces(10, 7);
+    public void testUnParkWhileNotParked() {
+        //myCar.setParkingPlaces(10, 7);
         //Act
         myCar.UnPark();
         Object[] whereIs = myCar.WhereIs();
@@ -283,11 +321,11 @@ class CarTest {
 
     // UnPark() at the end of the street”
     @Test
-    public void testUnParkAtEndOfStreet(){
-        myCar.setParkingPlaces(499, 499);
+    public void testUnParkAtEndOfStreet() {
+        //myCar.setParkingPlaces(499, 499);
         //Arrange
         //we must first park in order to test unPark, and we must drive at least 5m to successfully park
-        for (int i =0; i< Utilities.parkingStreetLength - 1 ;i++){
+        for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
             myCar.MoveForward();
         }
         Object[] whereIs = myCar.WhereIs();
@@ -296,7 +334,6 @@ class CarTest {
         myCar.Park();
         Object[] whereIs1 = myCar.WhereIs();
         prevPos = (Integer) whereIs1[0];
-    boolean isP = (Boolean) whereIs1[1];
         //Act
         myCar.UnPark();
         whereIs = myCar.WhereIs();
@@ -307,7 +344,7 @@ class CarTest {
         Assertions.assertFalse(isParked, "The car is still parked.");
 
         //Assert - we gotta move 2m forward when unparking
-        Assertions.assertEquals(prevPos+2, newPos, "The car is still parked and has not changed in position.");
+        Assertions.assertEquals(prevPos + 2, newPos, "The car is still parked and has not changed in position.");
     }
 /*
 //3 tests for park, and 2 for unpark
@@ -364,13 +401,6 @@ class CarTest {
      }
      */
     /*
-    @Test
-    public void testisEmpty1NoisySensor(){
-        //it is difficult to deliberately make one sensor data as noisy data
-        //Act
-        int distance = myCar.isEmpty();
-        //Assert
-        Assertions.assertNotNull(distance, "The sensor data is null.");
-    }
-*/
+
+     */
 }
