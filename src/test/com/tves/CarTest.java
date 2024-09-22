@@ -32,6 +32,7 @@ class CarTest {
     //MoveForward() when c1 is false, c2 is true, and c3 is false from decision table.
     @Test
     public void testMoveForward() {
+        myCar.setParkingPlaces(10, 7);
         //Arrange
         Object[] whereIs = myCar.WhereIs();
         int prevPosition = (Integer) whereIs[0];
@@ -47,6 +48,7 @@ class CarTest {
     //MoveForward() when c1 is true.
     @Test
     public void testMoveForwardWhileParked(){
+        myCar.setParkingPlaces(10, 7);
         //Act
         for(int i = 0; i < 6; i++){
             myCar.MoveForward();
@@ -66,6 +68,7 @@ class CarTest {
     //MoveForward() when c1 is false, c2 is true, and c3 is true.
     @Test
     public void testMoveForwardAtEndOfStreet(){
+        myCar.setParkingPlaces(10, 7);
         //Act
         Object[] whereIs = myCar.WhereIs();
         int prevPos = (Integer) whereIs[0];
@@ -85,6 +88,7 @@ class CarTest {
     //     * MoveBackward() when c1 is false, c2 is true, and c3 is false.
     @Test
     public void testMoveBackward(){
+        myCar.setParkingPlaces(10, 7);
         //Act
         //first move forward
         myCar.MoveForward();
@@ -102,6 +106,7 @@ class CarTest {
     //MoveBackward() when c1 is true.
     @Test
     public void testMoveBackwardWhileParked(){
+        myCar.setParkingPlaces(10, 7);
         //Act
         //first move forward
         for(int i = 0; i < 6; i++){
@@ -164,8 +169,9 @@ class CarTest {
     //Park() when c1 is false, c2 is false, c3 is true. We name this method “testPark()”
     @Test
     public void testPark(){
+        myCar.setParkingPlaces(10, 7);
         //Arrange
-        //we first drive at least 5meters ahead on the road
+        //we first drive at least 5 meters ahead on the road
         for (int i =0; i<5;i++){
             myCar.MoveForward();
         }
@@ -188,6 +194,7 @@ class CarTest {
     //Park() when c1 is true, we name this method “testParkWhileParked()”
     @Test
     public void testParkWhileParked(){
+        myCar.setParkingPlaces(10, 7);
         //Arrange
         //we first drive at least 5meters ahead on the road
         for (int i =0; i<5;i++){
@@ -211,9 +218,11 @@ class CarTest {
     //Park() when c1 is false, c2 is false, c3 is false. We name this method “testParkWithNoParkingAvailable()”
     @Test
     public void testParkWithNoParkingAvailable(){
+        myCar.setParkingPlaces(1, 0);
         //Arrange
         //we first drive at a spot where parking is occupied
         //Since we have deliberately made the parking unavailable if(i%10 == 7 || i%10 == 8 || i%10 == 9){
+
         for (int i =0; i<18;i++){
             myCar.MoveForward();
         }
@@ -236,6 +245,7 @@ class CarTest {
     // UnPark() when c1 is true. We name this method “testUnPark()”
     @Test
     public void testUnPark(){
+        myCar.setParkingPlaces(10, 7);
         //Arrange
         //we must first park in order to test unPark, and we must drive at least 5m to successfully park
         for (int i =0; i<5;i++){
@@ -261,6 +271,7 @@ class CarTest {
     // UnPark() when c1 is false. We name this method “testUnParkWhileNotParked()”
     @Test
     public void testUnParkWhileNotParked(){
+        myCar.setParkingPlaces(10, 7);
         //Act
         myCar.UnPark();
         Object[] whereIs = myCar.WhereIs();
@@ -273,6 +284,7 @@ class CarTest {
     // UnPark() at the end of the street”
     @Test
     public void testUnParkAtEndOfStreet(){
+        myCar.setParkingPlaces(499, 499);
         //Arrange
         //we must first park in order to test unPark, and we must drive at least 5m to successfully park
         for (int i =0; i< Utilities.parkingStreetLength - 1 ;i++){

@@ -11,6 +11,11 @@ public class Car implements ParkingAssistant{
      * */
     private ArrayList<Boolean> registeredParkingPlaces;
 
+    /**
+     * Pre-programmed occupied parking places on the RHS.
+     */
+    private boolean[] parking;
+
     /** Indicates whether the car is currently parked.*/
     private boolean isParked;
 
@@ -18,8 +23,6 @@ public class Car implements ParkingAssistant{
      * xPosition ranges from 0 to 499 to show car's (horizontal) position on the street
      */
     private int xPosition;
-
-    private boolean[] parking;
 
     /** Constructor to initialize the Car with a given parking street and two sensors.*/
     public Car(Sensor sensor1, Sensor sensor2) {
@@ -33,15 +36,6 @@ public class Car implements ParkingAssistant{
         this.xPosition = 0; //at the start of the street on the driveway
         //All parking places
         this.parking = new boolean[500];
-        //Setting some parking places to be available and unavailable
-        for(int i = 0; i < this.parking.length;i++){
-            if(i%10 == 7 || i%10 == 8 || i%10 == 9){
-                this.parking[i] = false;
-            }
-            else{
-                this.parking[i] = true;
-            }
-        }
     }
 
     /**
@@ -139,37 +133,6 @@ public class Car implements ParkingAssistant{
             aggrDataOneSensor = (aggrDataFS1 + aggrDataFS2) / 2;
         }
         return aggrDataOneSensor;
-/*
-
-        // decide on a threshold for the data to be considered noisy
-        int maxIndexFS1 = 0, maxIndexFS2 = 0, minIndexFS1 = 0, minIndexFS2 = 0, threshold = 10;
-        // finding max and min value to compare them and find if they are significant
-        for(int i = 0; i < dataFromFS1.length; i++){
-            // going through data set to search for the max and min value
-            if(dataFromFS1[i] >= dataFromFS1[maxIndexFS1]){
-                maxIndexFS1 = i;
-            }
-            if(dataFromFS1[i] <= dataFromFS1[minIndexFS1]){
-                minIndexFS1 = i;
-            }
-            if(dataFromFS2[i] >= dataFromFS2[maxIndexFS2]){
-                maxIndexFS2 = i;
-            }
-            if(dataFromFS2[i] <= dataFromFS2[minIndexFS2]){
-                minIndexFS2 = i;
-            }
-        }
-
-        // if the difference is high then the disregard sensor
-        if(dataFromFS1[maxIndexFS1]-dataFromFS1[minIndexFS1] > threshold){
-            FS1 = false;
-        }
-        if(dataFromFS1[maxIndexFS2]-dataFromFS1[minIndexFS2] > threshold){
-            FS2 = false;
-        }
-
- */
-
     }
 
     /** calls isEmpty method to get sensors data and estimate whether we have 5m long stretch available */
@@ -209,12 +172,6 @@ public class Car implements ParkingAssistant{
     }
 
     /**
-     * @Description pre-programmed reverse parallel parking maneuver.
-     * Currently only sets y to 0 to get the car in the driving area
-     *
-     */
-
-    /**
      * @Description: moves the car forward (and to left) to front of the parking place, if it is parked.
      *
      * @throws IllegalArgumentException If what happens
@@ -226,9 +183,9 @@ public class Car implements ParkingAssistant{
             if (this.isParked){
                int driveUpto = this.xPosition + 2; //because we drive 2m back for parking
                //Testcase: Corresponding to the test case of unparking at the end of the street "testUnParkAtEndOfStreet".
-                if (driveUpto >= Utilities.parkingStreetLength){
-                   driveUpto = Utilities.parkingStreetLength -1;
-               }
+              /*  if (driveUpto >= Utilities.parkingStreetLength){
+                   driveUpto = Utilities.parkingStreetLength - 1;
+               }*/
                this.isParked = false;
                //Since the car must move forward (and to the left) to get back on the drive area
                while (this.xPosition < driveUpto){
@@ -246,5 +203,23 @@ public class Car implements ParkingAssistant{
     public Object[] WhereIs() {
         return new Object[]{this.xPosition,this.isParked};
     }
-
+    /**
+     * @Description: setting the occupied parking places on street manually, to sett all parking places on
+     * street as occupied, mod = 500 and n = 500
+     *
+     * @return boolean[]
+     */
+    public boolean[] setParkingPlaces(int mod, int n){
+    //Setting some parking places to be available and unavailable
+        for(int i = 0; i < this.parking.length; i++){
+        //Setting all parking places occupied by mod = 1 n = 0.
+            if(i%mod == n || i%mod == n+1 || i%mod == n+2){
+                this.parking[i] = false;
+            }
+            else{
+                this.parking[i] = true;
+            }
+        }
+        return this.parking;
+    }
 }

@@ -82,4 +82,12 @@ public interface ParkingAssistant {
      * @throws?
      */
     public Object[] WhereIs();
+
+    /**
+     * @Description: setting the occupied parking places on street manually, to sett all parking places on
+     * street as occupied, mod = 500 and n = 500
+     *
+     * @return boolean[]
+     */
+    public boolean[] setParkingPlaces(int mod, int n);
 }
