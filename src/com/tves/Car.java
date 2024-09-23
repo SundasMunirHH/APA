@@ -174,7 +174,7 @@ public class Car implements ParkingAssistant {
     public void Park() {
         //testcase: testParkWhileParked and testParkAtStart, Assert 1 ans 2
         // If the car is already parked we do not need to do anything
-        if (this.isParked || this.xPosition < 5) {
+        if (this.isParked || this.xPosition < 4) {
             return;
         }
 
