@@ -61,14 +61,14 @@ public class Car implements ParkingAssistant {
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
 
-        //testcase: testMoveForward, Assert 1
+        //testcase: testMoveForward, Assert 1, and testMoveForwardAtEndOfStreet, and
         // moves the car 100 centimeter forward until end of the street
-        if (this.xPosition < Utilities.parkingStreetLength - 1) {//testcase: testMoveForwardAtEndOfStreet
+        if (this.xPosition < Utilities.parkingStreetLength - 1) {//testcase:
             //we cannot let xPosition be 500,
             this.xPosition += 1;
         }
 
-        //testcase: testMoveForward, Assert 2
+        //testcase: testMoveForward, Assert 2, and testMoveForwardParkingAvailable, and testMoveForwardParkingNotAvailable
         // Register parking place on RHS of current position
         this.registeredParkingPlaces.set(this.xPosition, isAvailableParkingPlace());
 
@@ -90,12 +90,12 @@ public class Car implements ParkingAssistant {
             return new Object[]{this.xPosition, this.registeredParkingPlaces};
         }
 
-        //testcase: testMoveBackwardAtStartOfStreet
+        //testcase: testMoveBackwardAtStartOfStreet, and testMoveBackwardBeyondStreet
         if (this.xPosition > 0) {
             this.xPosition -= 1;
         }
 
-        //testcase: testMoveBackward, Assert 2
+        //testcase: testMoveBackward, Assert 2, and testMoveBackwardParkingAvailable, and testMoveBackwardParkingNotAvailable
         // Register parking place on RHS of current position
         this.registeredParkingPlaces.set(this.xPosition, isAvailableParkingPlace());
 
@@ -198,7 +198,6 @@ public class Car implements ParkingAssistant {
     }
 
     /**
-     * @throws IllegalArgumentException If what happens
      * @Description: moves the car forward (and to left) to front of the parking place, if it is parked.
      */
     @Override
@@ -236,7 +235,6 @@ public class Car implements ParkingAssistant {
      */
     private void setParkingPlaces(int xPos, boolean value) {
         //testcase: testUnPark Assert 3, and testPark, Assert 3
-        //Setting some parking places to be available and unavailable
         Utilities.parking[xPos] = value;
         Utilities.parking[xPos - 1] = value;
         Utilities.parking[xPos - 2] = value;

@@ -3,24 +3,21 @@ package com.tves;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+//Since this class automatically gets tested when the car class is tested, we have omitted to implement redundant test cases here.
 class UltraSoundSensorTest {
 
     @Test
     public void testGetSensorData(){
-       // int position, int noise
 
     }
 
     @Test
     public void isNoise(){
-        //int[] sensorData
 
     }
 
     @Test
     public void aggregatedValue(){
-        //int[] readings
 
     }
 
