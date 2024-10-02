@@ -10,5 +10,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="org.junit.jupiter:junit-jupiter:5.9.1" level="project" />
     <orderEntry type="library" exported="" name="org.junit.runner.JUnitCore" level="project" />
+    <orderEntry type="library" name="mockito.junit.jupiter" level="project" />
   </component>
 </module>
