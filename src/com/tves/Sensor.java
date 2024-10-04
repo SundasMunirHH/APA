@@ -6,7 +6,7 @@ public interface Sensor {
      * @Description The sensor inputs are integers (in the range of 0 to 200)
      * indicating the distance to the nearest object on the right.
      *
-     * @param position where the sensor takes its input and noise introduced to the sensor
+     * @param position is where the sensor takes its input and noise is out-of-bound value
      * @return: int sensor data or its reading
      */
     int getSensorData(int position, int noise);

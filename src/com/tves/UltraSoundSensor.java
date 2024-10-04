@@ -35,10 +35,6 @@ public class UltraSoundSensor implements Sensor {
         //A well functioning sensor has 0 noise.
         closesObjectAtRHS = closesObjectAtRHS + (int) (Math.random() * noise);
         return closesObjectAtRHS;
-      /*  if(!data[position]){
-            return (int) ((Math.random()*(55-45))+45);
-        }
-        return (int) ((Math.random()*(195-185))+185);*/
     }
 
     @Override
