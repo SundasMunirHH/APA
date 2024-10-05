@@ -11,7 +11,6 @@ public interface Sensor {
      */
     int getSensorData(int position, int noise);
 
-
     /**
      * @Description If the sensor inputs are not in the range of 0 to 200, it indicates noise.
      *

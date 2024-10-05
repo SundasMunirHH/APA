@@ -162,7 +162,7 @@ public class Car implements ParkingAssistant {
      * @Testcases: testMoveForward(Assert 2), testMoveBackward(Assert 2),
      * testParkWhileParked,
      */
-    private boolean isAvailableParkingPlace() {
+    public boolean isAvailableParkingPlace() {
         //@Testcases: testMoveForward(Assert 2) and testMoveBackward(Assert 2)
         int distanceToObjectRHS = isEmpty();
         if (distanceToObjectRHS <= 60) {
