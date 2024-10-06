@@ -481,12 +481,5 @@ class CarTest {
         Assertions.assertEquals(prevPos + 2, newPos, "The car is still parked and has not changed in position.");
     }
 
-    //test: unparks the car and drive to the end of the street. also attempts to drive past end of street
-
-    //test: drives car from start, attempts to drive where it cant park, tries to back and drive
-    //past start point.
-
-    //test: tries to unpark when its not parked.
-
 
 }

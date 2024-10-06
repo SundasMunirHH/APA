@@ -1,13 +1,13 @@
 package com.tves;
-import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
+import static org.mockito.Mockito.*;
 
 //Tell mockito to create mocks based on @Mock annotation
 @ExtendWith(MockitoExtension.class)
@@ -17,7 +17,8 @@ class CarMockitoTest {
     Sensor mockedSensor1, mockedSensor2;
     //Mock Actuator
     Actuator mockedActuator;
-    //Mock the Car instance
+    //Inject the mock dependencies into constructor in Car
+    @InjectMocks
     Car mockedCar;
 
     @BeforeEach
