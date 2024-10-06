@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -21,6 +19,11 @@ class CarMockitoTest {
     @BeforeEach
     public void createCarMock() {
         mockedCar = spy(new Car(mockedSensor1, mockedSensor2));
+        //By default all parking places are available
+        //Each scenario will make some parking places occupied
+        for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
+            Utilities.parking[i] = true;
+        }
     }
 
    @Test
@@ -38,92 +41,92 @@ class CarMockitoTest {
         // Lenient stubbing (Mockito will not complain if this stub is unused)
         lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{0, false});
 
-        //The sensor data should be mocked such that it represent a street with three parking places of mutually different sizes,
-        // one should be not enough for safe parking and the other two enough for parking.
+        //To specify that only a few parking places must be available
         for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
-            Utilities.parking[i] = true;//currently all parking places are available, we can hardcode to make some parking places unavailable
+            //We only make 2 parking places to be available and rest of the street is occupied
+            // One parking place is second last place - close to the end of the street
+            // Another is the first parking place at the beginning
+            if ((i >= 490 && i < 495) || (i >= 0 && i <= 5)){
+                Utilities.parking[i] = true;
+            }else{
+                Utilities.parking[i] = false;
+            }
         }
-        int pp = 1;
+        int t = 1;
         //Moves along the street and scan the available parking places,
         for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
             mockedCar.MoveForward();
-            verify(mockedCar, times(pp)).MoveForward();
+            verify(mockedCar, times(t)).MoveForward();
             //if moveForward works correctly, the WhereIs() method will return a position that is i+1
             lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i+1, false});
             if(i == Utilities.parkingStreetLength/2) {
                 // One of the sensors should be broken halfway in the middle of the scenario
-                // (i.e., when the car has reached the middle of the street while moving forward)
                 Utilities.noiseS1 = 100;
             }
-            pp++;
+            t++;
           }
-        Object[] whereIs = mockedCar.WhereIs();
-        int pos = (Integer) whereIs[0];
-        System.out.println("Current Pos: "+ pos );//just varifying that the car is at the end of the street
-        //Verify that move forward was called 499 times in above loop
+
+        //Verify that move forward was called 499 times in the above loop
         verify(mockedCar, times(499)).MoveForward();
 
-        int p = 1;
+        t = 1;
         //Moves backwards until the most efficient parking place (the smallest available parking where it can still park safely),
         for (int i = Utilities.parkingStreetLength-1; i>0; i--) {
             mockedCar.MoveBackward();
-            verify(mockedCar, times(p)).MoveBackward();
+            //verify that Move backward is called in each iteration
+            verify(mockedCar, times(t)).MoveBackward();
             //verify that the car is moving 1m backward in each iteration
             lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i-1, false});
-            //lets try to park the mocked car
-            mockedCar.Park();
-            //verify that the car parked
-            verify(mockedCar, times(p)).Park();
 
-            whereIs = mockedCar.WhereIs();
-            pos = (Integer) whereIs[0];
-            boolean isParked = (Boolean) whereIs[1];
-            System.out.println("Pos now: "+ pos + " is parked? " + isParked);//IMP: why is the car not parking?
-            if(isParked || pos == 0) {
+            // Since only two parking places are available
+            lenient().when(mockedCar.isAvailableParkingPlace()).thenReturn(Utilities.parking[i]);
+
+            if(mockedCar.isAvailableParkingPlace()) {
                 //Parks the car,
                 //The car should be parked here because all the parking places are available
-                System.out.println(isParked + "?");
+                //lets try to park the mocked car
+                mockedCar.Park();
+                //verify that the parked method was called
+                verify(mockedCar).Park();
+                //verify that the car parked at the first available parking place that it found (at the end of the street)
+                lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{493, true});
                 break;
             }
-            p++;
+            t++;
         }
 
         //Unparks the car and drive to the end of the street.
         mockedCar.UnPark();
         //verify that the car unparked
         verify(mockedCar).UnPark();
+        //verify that the car unparked from the position that it was parked in
+        lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{493, false});
 
-        whereIs = mockedCar.WhereIs();
-        int i = (Integer) whereIs[0];
-        System.out.println("Where is the car now? " + i);
-        while ( i < Utilities.parkingStreetLength - 1) {
+        Object[] whereIs = mockedCar.WhereIs();
+        int pos = (Integer) whereIs[0];
+
+        while (pos < Utilities.parkingStreetLength - 1) {
             mockedCar.MoveForward();
             //Verify that move forward was called in each loop iteration
-            lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i+1, false});
-            i++;
+            lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{pos+1, false});
+            pos++;
         }
         Utilities.noiseS1 = 0;//Resetting the noise in the sensor
     }
 
     @Test
     public void testMockitoScenario2() {
-        //Stubbing
         //Scenario# 2
         //Starts at the beginning of the street,
-        // Lenient stubbing (Mockito will not complain if this stub is unused)
         lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{0, false});
         Random randomSensorVal = new Random();
 
-        //The sensor data should be mocked such that it represent a street with three parking places of mutually different sizes,
-        // one should be not enough for safe parking and the other two enough for parking.
-        for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
-            Utilities.parking[i] = true;//currently all parking places are available, we can hardcode to make some parking places unavailable
-        }
-        int pp = 1;
+        int t = 1;
         //Moves along the street and scan the available parking places,
         for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
             // Randomizes noise value between 0-10
             Utilities.noiseS1 = randomSensorVal.nextInt(10);
+            mockedSensor1.getSensorData(i, Utilities.noiseS1);
             //Mock the sensordata with noise values
             when(mockedSensor1.getSensorData(i, Utilities.noiseS1)).thenReturn(20, 20, 23, 18, 2);
             //Verify that the sensor was called correctly
@@ -135,7 +138,7 @@ class CarMockitoTest {
                 verify(mockedSensor2, times(5)).getSensorData(i, Utilities.noiseS2);
             }
             mockedCar.MoveForward();
-            verify(mockedCar, times(pp)).MoveForward();
+            verify(mockedCar, times(t)).MoveForward();
             //if moveForward works correctly, the WhereIs() method will return a position that is i+1
             lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i+1, false});
             // The sensors are a little noisy but not distrupted
@@ -143,7 +146,7 @@ class CarMockitoTest {
             if(i == Utilities.parkingStreetLength/2) {
               Utilities.noiseS2 = 200;
             }
-            pp++;
+            t++;
         }/*
         Object[] whereIs = mockedCar.WhereIs();
         int pos = (Integer) whereIs[0];
