@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -28,6 +30,7 @@ class CarMockitoTest {
         assertNotNull(mockedSensor1);
         assertNotNull(mockedSensor2);
     }
+
     @Test
     public void testMockitoScenario1() {
         //Scenario# 1
@@ -109,6 +112,7 @@ class CarMockitoTest {
         //Starts at the beginning of the street,
         // Lenient stubbing (Mockito will not complain if this stub is unused)
         lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{0, false});
+        Random randomSensorVal = new Random();
 
         //The sensor data should be mocked such that it represent a street with three parking places of mutually different sizes,
         // one should be not enough for safe parking and the other two enough for parking.
@@ -118,15 +122,26 @@ class CarMockitoTest {
         int pp = 1;
         //Moves along the street and scan the available parking places,
         for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
+            // Randomizes noise value between 0-10
+            Utilities.noiseS1 = randomSensorVal.nextInt(10);
+            //Mock the sensordata with noise values
+            when(mockedSensor1.getSensorData(i, Utilities.noiseS1)).thenReturn(20, 20, 23, 18, 2);
+            //Verify that the sensor was called correctly
+            verify(mockedSensor1, times(5)).getSensorData(i, Utilities.noiseS1);
+            // Checking if sensor 2 is broken
+            if(Utilities.noiseS2 != 200) {
+                Utilities.noiseS2 = randomSensorVal.nextInt(10);
+                when(mockedSensor2.getSensorData(i, Utilities.noiseS2)).thenReturn(22, 20, 40, 19, 21);
+                verify(mockedSensor2, times(5)).getSensorData(i, Utilities.noiseS2);
+            }
             mockedCar.MoveForward();
             verify(mockedCar, times(pp)).MoveForward();
             //if moveForward works correctly, the WhereIs() method will return a position that is i+1
             lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i+1, false});
-                // One of the sensors should be broken halfway in the middle of the scenario
-                // (i.e., when the car has reached the middle of the street while moving forward)
-                if(i%5 == 0) {
-                    // Testing every 5 m to add more noise (Will be randomized, this is just a test)
-                    Utilities.noiseS1 = 10;
+            // The sensors are a little noisy but not distrupted
+            // Halfway into the street sensor2 will break.
+            if(i == Utilities.parkingStreetLength/2) {
+              Utilities.noiseS2 = 200;
             }
             pp++;
         }/*
