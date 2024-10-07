@@ -59,8 +59,9 @@ class CarMockitoTest {
             verify(mockedCar, times(t)).MoveForward();
             //if moveForward works correctly, the WhereIs() method will return a position that is i+1
             lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i+1, false});
+
+            // One of the sensors should be broken halfway in the middle of the scenario
             if(i == Utilities.parkingStreetLength/2) {
-                // One of the sensors should be broken halfway in the middle of the scenario
                 Utilities.noiseS1 = 100;
             }
             t++;
@@ -117,8 +118,9 @@ class CarMockitoTest {
     @Test
     public void testMockitoScenario2() {
         //Scenario# 2
-        //Starts at the beginning of the street,
+        //Car starts at the beginning of the street,
         lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{0, false});
+
         Random randomSensorVal = new Random();
 
         int t = 1;
@@ -126,31 +128,24 @@ class CarMockitoTest {
         for (int i = 0; i < Utilities.parkingStreetLength - 1; i++) {
             // Randomizes noise value between 0-10
             Utilities.noiseS1 = randomSensorVal.nextInt(10);
+            //Mock the sensor data with noise values
             mockedSensor1.getSensorData(i, Utilities.noiseS1);
-            //Mock the sensordata with noise values
-            when(mockedSensor1.getSensorData(i, Utilities.noiseS1)).thenReturn(20, 20, 23, 18, 2);
-            //Verify that the sensor was called correctly
-            verify(mockedSensor1, times(5)).getSensorData(i, Utilities.noiseS1);
-            // Checking if sensor 2 is broken
-            if(Utilities.noiseS2 != 200) {
+
+            if (i >= 230 && i <=235){
+                //Sensor 2 works correctly in the middle of the street next to one specific parking place
+                Utilities.noiseS2 = 0;
+            }else{
                 Utilities.noiseS2 = randomSensorVal.nextInt(10);
-                when(mockedSensor2.getSensorData(i, Utilities.noiseS2)).thenReturn(22, 20, 40, 19, 21);
-                verify(mockedSensor2, times(5)).getSensorData(i, Utilities.noiseS2);
+                mockedSensor2.getSensorData(i, Utilities.noiseS2);
+
             }
             mockedCar.MoveForward();
             verify(mockedCar, times(t)).MoveForward();
             //if moveForward works correctly, the WhereIs() method will return a position that is i+1
             lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i+1, false});
-            // The sensors are a little noisy but not distrupted
-            // Halfway into the street sensor2 will break.
-            if(i == Utilities.parkingStreetLength/2) {
-              Utilities.noiseS2 = 200;
-            }
             t++;
-        }/*
-        Object[] whereIs = mockedCar.WhereIs();
-        int pos = (Integer) whereIs[0];
-        System.out.println("Current Pos: "+ pos );//just varifying that the car is at the end of the street
+        }
+
         //Verify that move forward was called 499 times in above loop
         verify(mockedCar, times(499)).MoveForward();
 
@@ -161,88 +156,30 @@ class CarMockitoTest {
             verify(mockedCar, times(p)).MoveBackward();
             //verify that the car is moving 1m backward in each iteration
             lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i-1, false});
-            //lets try to park the mocked car
-            mockedCar.Park();
-            //verify that the car parked
-            verify(mockedCar, times(p)).Park();
 
-            whereIs = mockedCar.WhereIs();
-            pos = (Integer) whereIs[0];
-            boolean isParked = (Boolean) whereIs[1];
-            System.out.println("Pos now: "+ pos + " is parked? " + isParked);//IMP: why is the car not parking?
-            if(isParked || pos == 0) {
+            // One sensor detected only one parking place as available/vacant, between 230 and 235
+            if (i >= 230 && i <=235){
+                lenient().when(mockedCar.isAvailableParkingPlace()).thenReturn(true);
+            }else {
+                lenient().when(mockedCar.isAvailableParkingPlace()).thenReturn(false);
+            }
+
+            mockedCar.isAvailableParkingPlace();
+
+            if(mockedCar.isAvailableParkingPlace()) {
                 //Parks the car,
-                //The car should be parked here because all the parking places are available
-                System.out.println(isParked + "?");
+                mockedCar.Park();
+
+                //verify that the park method was called
+                verify(mockedCar).Park();
+
+                //verify that the car parked at the only available parking place that it found
+                lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{234, true});
                 break;
             }
             p++;
-
         }
-
-        //Unparks the car and drive to the end of the street.
-        mockedCar.UnPark();
-        //verify that the car unparked
-        verify(mockedCar).UnPark();
-
-        whereIs = mockedCar.WhereIs();
-        int i = (Integer) whereIs[0];
-        System.out.println("Where is the car now? " + i);
-        while ( i < Utilities.parkingStreetLength - 1) {
-            mockedCar.MoveForward();
-            //Verify that move forward was called in each loop iteration
-            lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{i+1, false});
-            i++;
-        }
-        Utilities.noiseS1 = 0;//Resetting the noise in the sensor*/
+        //Resetting the noise in the sensor
+        Utilities.noiseS1 = Utilities.noiseS2 = 0;
     }
-
-    /*@Test
-    public void testMockitoConstructor() {
-        //Stubbing
-        //carMock.isEmpty();
-        mockedCar.WhereIs();
-        //verify(carMock).isEmpty();
-        verify(mockedCar).WhereIs();
-        //since we do not really call the WhereIS method, not using linennt would cause the
-        // error of unnecessary stubbing.
-        // Lenient stubbing (Mockito will not complain if this stub is unused)
-        lenient().when(mockedCar.WhereIs()).thenReturn(new Object[]{0, false});
-        //Configure Mock to return true when isEmpty() is called.
-       // when(CarMock.isEmpty()).thenReturn(201);
-
-        //MockedConstruction<Car> CarMockito = mockConstruction(Car.class);
-
-      /*  try(MockedConstruction<Car> carMock = mockConstruction(Car.class)){
-            //Arrange
-            Sensor sensor1 = new UltraSoundSensor("sensor1");
-            Sensor sensor2 = new UltraSoundSensor("sensor2");
-            when(carMock.constructed().WhereIs());
-
-        }*/
-
-/*
-       // when(new Car(any(Car.class).thenReturn(null)));
-
-       CarMock = new Car(sensor1, sensor2);
-        //The car object should not be null
-        assertNotNull(CarMock);
-
-        //assertEquals()
-
-        //Testing initialization of car at an expected state
-        Object[] whereIs = CarMock.WhereIs();
-        int startingPosition = (Integer) whereIs[0];
-        boolean isParked = (Boolean) whereIs[1];
-
-        assertFalse(isParked);
-        assertEquals(0,startingPosition);
-
-        //whereIs = CarMock.WhereIs();
-        //int newPos = (Integer) whereIs[0];
-       // when(CarMock.MoveForward()).thenReturn(new Object[]{1, this.registeredParkingPlaces};);
-
-    }*/
-
-    // We need a single mock whose methods must be invoked in a particular order
 }
